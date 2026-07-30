@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "pdf-dosya-boyutu-kucultme-rehberi",
+    "title": "PDF Dosya Boyutunu Küçültmenin 5 Etkili Yolu",
+    "category": "PDF",
+    "excerpt": "E-posta limitine takılan PDF’leri kaliteden ödün vermeden küçültmenin pratik yöntemleri.",
+    "body": "PDF dosyaları çoğu zaman içindeki görseller yüzünden büyür. Metin katmanı birkaç yüz kilobayt yer kaplarken, taranmış tek bir sayfa onlarca megabayta ulaşabilir.\n\n## 1. Görsel çözünürlüğünü düşürün\nEkranda okunacak bir belge için 150 DPI fazlasıyla yeterlidir. Baskı için 300 DPI gerekir, ancak arşivleme amaçlı belgelerde bu değeri düşürmek dosya boyutunu yarıdan fazla azaltır.\n\n## 2. Gereksiz sayfaları çıkarın\nBoş sayfalar, kapak tekrarları ve ekler çoğu zaman gereksizdir. PDF Böl aracıyla yalnızca ihtiyacınız olan aralığı ayırabilirsiniz.\n\n## 3. Gömülü fontları sadeleştirin\nBelgede kullanılmayan font varyantlarının gömülü kalması boyutu artırır. Yeniden kaydetme sırasında yalnızca kullanılan karakter setini gömmek daha verimlidir.\n\n## 4. Görselleri önceden sıkıştırın\nBelgeyi oluşturmadan önce görselleri sıkıştırmak, sonradan tüm PDF’i yeniden işlemekten çok daha iyi sonuç verir.\n\n## 5. Birleştirirken tekrarları temizleyin\nBirden fazla PDF’i birleştirirken aynı kapak veya antet sayfasının tekrarlanmadığından emin olun.",
+    "date": "2025-03-18",
+    "reading_time": 6,
+    "tools": "compress-pdf,merge-pdf,image-compressor"
+  },
+  {
+    "slug": "core-web-vitals-gorsel-optimizasyonu",
+    "title": "Core Web Vitals için Görsel Optimizasyonu",
+    "category": "Performans",
+    "excerpt": "LCP puanınızı düşüren en büyük neden genelde görsellerdir. Doğru format ve boyut nasıl seçilir?",
+    "body": "Largest Contentful Paint (LCP) metriği, sayfadaki en büyük görsel öğenin ne kadar sürede göründüğünü ölçer. Çoğu sitede bu öğe bir kapak görselidir.\n\n## Doğru formatı seçin\nWebP, aynı görsel kalitesinde JPEG’e göre ortalama %25-35 daha küçük dosya üretir. Şeffaflık gerekmiyorsa PNG yerine WebP veya JPEG tercih edin.\n\n## Gerçek gösterim boyutunda sunun\n2400 piksel genişliğinde bir görseli 600 piksellik bir alanda göstermek, kullanıcıya boşuna dört kat veri indirtir. Görseli önce hedef boyuta indirin.\n\n## Kalite ayarını deneyerek bulun\n%80 kalite çoğu fotoğrafta gözle ayırt edilemezken dosya boyutunu belirgin şekilde düşürür.",
+    "date": "2025-03-10",
+    "reading_time": 8,
+    "tools": "image-compressor,image-resizer,image-converter"
+  },
+  {
+    "slug": "guclu-parola-nasil-olusturulur",
+    "title": "Güçlü Parola Nasıl Oluşturulur?",
+    "category": "Güvenlik",
+    "excerpt": "Uzunluk mu karmaşıklık mı? Parola güvenliğinde gerçekten işe yarayan kurallar.",
+    "body": "Parola güvenliğinde en belirleyici faktör uzunluktur. 8 karakterlik karmaşık bir parola, 16 karakterlik basit bir parola cümlesinden çok daha hızlı kırılır.\n\n## Uzunluk her şeydir\nHer ek karakter, denenecek kombinasyon sayısını üstel olarak artırır. En az 16 karakter hedefleyin.\n\n## Tekrar kullanmayın\nBir sitede sızan parola, aynı parolayı kullandığınız tüm hesapları riske atar.\n\n## Parola yöneticisi kullanın\nRastgele üretilmiş, her site için farklı parolaları ezberlemeye çalışmayın.",
+    "date": "2025-02-28",
+    "reading_time": 5,
+    "tools": "password-generator,hash-generator"
+  },
+  {
+    "slug": "json-hatalari-ve-cozumleri",
+    "title": "En Sık Yapılan 7 JSON Hatası",
+    "category": "Geliştirme",
+    "excerpt": "Sondaki virgülden tırnak tipine, API entegrasyonlarını bozan klasik JSON hataları.",
+    "body": "JSON basit bir formattır ama katı kuralları vardır. En sık karşılaşılan hatalar neredeyse her zaman aynıdır.\n\n## Sondaki virgül\nJavaScript nesnelerinde geçerli olan sondaki virgül, JSON’da sözdizimi hatasıdır.\n\n## Tek tırnak\nJSON yalnızca çift tırnak kabul eder. Anahtarlar da tırnak içinde olmalıdır.\n\n## Yorum satırları\nJSON standardında yorum yoktur. Yapılandırma dosyalarınızda yoruma ihtiyaç duyuyorsanız JSON5 veya YAML düşünün.",
+    "date": "2025-02-14",
+    "reading_time": 7,
+    "tools": "json-formatter,json-validator,jwt-decoder"
+  },
+  {
+    "slug": "meta-etiketleri-2025-rehberi",
+    "title": "Meta Etiketleri: 2025 Uygulama Rehberi",
+    "category": "SEO",
+    "excerpt": "Hangi meta etiketleri hâlâ önemli, hangileri artık yok sayılıyor?",
+    "body": "Meta etiketlerinin bir kısmı yıllar içinde önemini yitirdi, bir kısmı ise hâlâ tıklanma oranınızı doğrudan etkiliyor.\n\n## Title etiketi\nSıralamayı ve tıklanmayı en çok etkileyen tek etikettir. 55-60 karakter arasında tutun.\n\n## Meta description\nDoğrudan sıralama faktörü değildir ama arama sonuçlarındaki tıklanma oranını belirler.\n\n## Meta keywords\nGoogle tarafından uzun süredir yok sayılıyor. Eklemenize gerek yok.\n\n## OpenGraph\nBağlantınız sosyal medyada paylaşıldığında nasıl göründüğünü belirler; ihmal edilmemeli.",
+    "date": "2025-01-30",
+    "reading_time": 9,
+    "tools": "meta-tag-generator,opengraph-generator,schema-generator"
+  },
+  {
+    "slug": "qr-kod-kullanim-alanlari",
+    "title": "QR Kodların İşletmeler İçin 10 Kullanım Alanı",
+    "category": "Pazarlama",
+    "excerpt": "Menüden fatura takibine, QR kodu gerçekten işe yarar hale getiren senaryolar.",
+    "body": "QR kod, fiziksel dünya ile dijital içerik arasındaki en ucuz köprüdür. Doğru senaryoda kullanıldığında dönüşüm oranı yüksektir.\n\n## Dijital menü\nBasılı menü maliyetini sıfırlar, fiyat güncellemesini anında yapmanızı sağlar.\n\n## Etkinlik kaydı\nDavetiye üzerindeki kod, katılımcıyı doğrudan kayıt formuna götürür.\n\n## Wi-Fi paylaşımı\nMisafirlerinize parolayı yazdırmadan güvenli bağlantı sunabilirsiniz.",
+    "date": "2025-01-18",
+    "reading_time": 6,
+    "tools": "qr-code-generator,qr-scanner,website-screenshot"
+  }
+]

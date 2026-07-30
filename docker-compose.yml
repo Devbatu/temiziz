@@ -1,0 +1,24 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        # NEXT_PUBLIC_* değerleri derleme anında paketlenir — burada verin.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://celaning.com}
+        NEXT_PUBLIC_ADSENSE_CLIENT: ${NEXT_PUBLIC_ADSENSE_CLIENT:-}
+        NEXT_PUBLIC_AD_HOME_MID: ${NEXT_PUBLIC_AD_HOME_MID:-}
+        NEXT_PUBLIC_AD_HOME_BOTTOM: ${NEXT_PUBLIC_AD_HOME_BOTTOM:-}
+        NEXT_PUBLIC_AD_TOOLS_GRID: ${NEXT_PUBLIC_AD_TOOLS_GRID:-}
+        NEXT_PUBLIC_AD_TOOL_BELOW: ${NEXT_PUBLIC_AD_TOOL_BELOW:-}
+        NEXT_PUBLIC_AD_TOOL_SIDEBAR: ${NEXT_PUBLIC_AD_TOOL_SIDEBAR:-}
+        NEXT_PUBLIC_AD_CATEGORY_TOP: ${NEXT_PUBLIC_AD_CATEGORY_TOP:-}
+        NEXT_PUBLIC_AD_BLOG_INARTICLE: ${NEXT_PUBLIC_AD_BLOG_INARTICLE:-}
+        NEXT_PUBLIC_AD_BLOG_LIST: ${NEXT_PUBLIC_AD_BLOG_LIST:-}
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      # Sunucu tarafı sırlar — derlemeye girmez, çalışma anında okunur.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SCREENSHOT_API_URL: ${SCREENSHOT_API_URL:-}
+      ADS_TXT_EXTRA: ${ADS_TXT_EXTRA:-}

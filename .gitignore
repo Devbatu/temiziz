@@ -1,0 +1,37 @@
+# bağımlılıklar
+node_modules/
+
+# Next.js derleme çıktıları
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# statik derleme çıktıları
+out/
+celaning-static.zip
+.static-stash/
+
+# dağıtım arşivleri (her derlemede yeniden üretilir)
+*.tar.gz
+*.zip
+
+# ortam değişkenleri — .env.example izlenir, gerçek değerler izlenmez
+.env
+.env.local
+.env*.local
+
+# sunucu tarafı gerçek yapılandırma: veritabanı parolası ve hash tuzu içerir.
+# Yalnızca mt-config.example.php depoda durur.
+server/mt-config.php
+mt-config.php
+
+# SSH / dağıtım anahtarları
+*.pem
+*.key
+id_rsa*
+deploy_key*
+
+# yerel kayıtlar ve geçici dosyalar
+*.log
+.DS_Store
+Thumbs.db
