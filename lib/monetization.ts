@@ -18,15 +18,25 @@ export const adsense = {
  * A missing id renders a reserved-space placeholder instead — no layout shift
  * either way.
  */
+/**
+ * Ortak yedek birim. AdSense'te tek bir "Görüntülü reklam / duyarlı" birimi
+ * oluşturup kimliğini buraya vermek yeterlidir; kendi kimliği tanımlanmamış
+ * her yerleşim bunu kullanır. Aynı birim kimliğinin birden fazla yerde
+ * kullanılması AdSense'te desteklenir — tek kaybı, raporlamada yerleşimlerin
+ * ayrı ayrı görünmemesidir. Bir yerleşimin kazancını ayrı izlemek istediğinde
+ * o yerleşim için ayrı birim oluşturup ilgili değişkeni doldurman yeterli.
+ */
+const adDefault = process.env.NEXT_PUBLIC_AD_DEFAULT ?? '';
+
 export const adSlots: Record<string, string> = {
-  'home-mid': process.env.NEXT_PUBLIC_AD_HOME_MID ?? '',
-  'home-bottom': process.env.NEXT_PUBLIC_AD_HOME_BOTTOM ?? '',
-  'tools-grid': process.env.NEXT_PUBLIC_AD_TOOLS_GRID ?? '',
-  'tool-below': process.env.NEXT_PUBLIC_AD_TOOL_BELOW ?? '',
-  'tool-sidebar': process.env.NEXT_PUBLIC_AD_TOOL_SIDEBAR ?? '',
-  'category-top': process.env.NEXT_PUBLIC_AD_CATEGORY_TOP ?? '',
-  'blog-inarticle': process.env.NEXT_PUBLIC_AD_BLOG_INARTICLE ?? '',
-  'blog-list': process.env.NEXT_PUBLIC_AD_BLOG_LIST ?? '',
+  'home-mid': process.env.NEXT_PUBLIC_AD_HOME_MID || adDefault,
+  'home-bottom': process.env.NEXT_PUBLIC_AD_HOME_BOTTOM || adDefault,
+  'tools-grid': process.env.NEXT_PUBLIC_AD_TOOLS_GRID || adDefault,
+  'tool-below': process.env.NEXT_PUBLIC_AD_TOOL_BELOW || adDefault,
+  'tool-sidebar': process.env.NEXT_PUBLIC_AD_TOOL_SIDEBAR || adDefault,
+  'category-top': process.env.NEXT_PUBLIC_AD_CATEGORY_TOP || adDefault,
+  'blog-inarticle': process.env.NEXT_PUBLIC_AD_BLOG_INARTICLE || adDefault,
+  'blog-list': process.env.NEXT_PUBLIC_AD_BLOG_LIST || adDefault,
 };
 
 /* ─────────────────────────── affiliate offers ─────────────────────────── */

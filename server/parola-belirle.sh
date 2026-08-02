@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Yonetim paneli parolasini belirler.
+# Yonetim paneli giris bilgilerini (kullanici adi + parola) belirler.
 #
-# Parola ekranda gorunmez, gecmise yazilmaz ve yalnizca hash'i saklanir.
+# Parola ekranda gorunmez, kabuk gecmisine yazilmaz ve yalnizca hash'i saklanir.
 # Kullanim:  bash ~/parola-belirle.sh
 
 set -euo pipefail
@@ -13,12 +13,26 @@ if [ ! -f "$CONFIG" ]; then
   exit 1
 fi
 
-echo "Yonetim paneli parolasi belirleniyor."
-echo "(en az 10 karakter onerilir; yazarken ekranda gorunmez)"
+echo "Yonetim paneli giris bilgileri belirleniyor."
+echo "(parola en az 10 karakter onerilir; yazarken ekranda gorunmez)"
 echo
 
-read -rsp "Yeni parola: " P1; echo
-read -rsp "Tekrar     : " P2; echo
+read -rp "Kullanici adi: " KUL
+if [ ${#KUL} -lt 3 ]; then
+  echo "HATA: Kullanici adi en az 3 karakter olmali." >&2
+  exit 1
+fi
+if [ "$KUL" = "admin" ]; then
+  echo "UYARI: 'admin' otomatik deneme araclarinin ilk denedigi kullanici adidir."
+  read -rp "Yine de kullanilsin mi? (e/H): " ONAY
+  case "$ONAY" in
+    e|E) ;;
+    *) echo "Iptal edildi."; exit 1 ;;
+  esac
+fi
+
+read -rsp "Yeni parola  : " P1; echo
+read -rsp "Tekrar       : " P2; echo
 
 if [ "$P1" != "$P2" ]; then
   echo "HATA: Parolalar eslesmiyor." >&2
@@ -29,42 +43,84 @@ if [ ${#P1} -lt 8 ]; then
   exit 1
 fi
 
-# Parolayi PHP'ye ortam degiskeniyle veriyoruz; komut satirinda gorunmez,
-# boylece 'ps' ciktisina ve kabuk gecmisine dusmez.
-MT_NEW_PASS="$P1" php -r '
-$config = $argv[1];
-$hash   = password_hash(getenv("MT_NEW_PASS"), PASSWORD_DEFAULT);
-$src    = file_get_contents($config);
+# PHP kodunu ayri bir gecici dosyaya yaziyoruz.
+#
+# NEDEN `php -r '...'` degil: kod icinde hem tek hem cift tirnak, hem de regex
+# kacislari var; bunlari tek tirnakli bir kabuk dizesine sigdirmak kacinilmaz
+# sekilde bozuluyor. Gecici dosya bu sorun sinifini tamamen ortadan kaldirir.
+YAZICI="$(mktemp -t mt-giris-XXXXXX.php)"
+trap 'rm -f "$YAZICI"' EXIT
 
-// DIKKAT: preg_replace kullanmayin. bcrypt hash i "$2y$..." ile baslar ve
-// degistirme metnindeki $2 geri-referans sanilip yutulur. Callback bicimi
-// degistirme metnini yorumlamaz, bu yuzden guvenlidir.
+cat > "$YAZICI" <<'PHPKODU'
+<?php
+/** mt-config.php icindeki admin_user ve admin_hash alanlarini gunceller. */
+declare(strict_types=1);
+
+$config    = $argv[1];
+$parola    = getenv('MT_NEW_PASS');
+$kullanici = getenv('MT_NEW_USER');
+$src = file_get_contents($config);
+$new = $src;
+
+/*
+ * DIKKAT: duz preg_replace kullanmayin. bcrypt hash'i "$2y$..." ile baslar ve
+ * degistirme metnindeki $2 geri-referans sanilip yutulur; sonucta parola
+ * dogrulamasi sessizce basarisiz olur. Callback bicimi degistirme metnini
+ * yorumlamaz, bu yuzden guvenlidir.
+ */
+$hash = password_hash($parola, PASSWORD_DEFAULT);
 $new = preg_replace_callback(
-    "/([\"\x27]admin_hash[\"\x27]\s*=>\s*)[\"\x27][^\"\x27]*[\"\x27]/",
+    '/([\'"]admin_hash[\'"]\s*=>\s*)[\'"][^\'"]*[\'"]/',
     static fn (array $m): string => $m[1] . var_export($hash, true),
-    $src,
+    $new,
     1,
-    $count
+    $sayi
 );
-if ($count !== 1) {
+if ($sayi !== 1) {
     fwrite(STDERR, "HATA: admin_hash alani bulunamadi.\n");
     exit(1);
 }
+
+// Kullanici adi: alan varsa guncellenir, yoksa admin_hash satirinin ustune eklenir.
+if (preg_match('/[\'"]admin_user[\'"]\s*=>/', $new)) {
+    $new = preg_replace_callback(
+        '/([\'"]admin_user[\'"]\s*=>\s*)[\'"][^\'"]*[\'"]/',
+        static fn (array $m): string => $m[1] . var_export($kullanici, true),
+        $new,
+        1
+    );
+} else {
+    $new = preg_replace_callback(
+        '/^([ \t]*)([\'"]admin_hash[\'"]\s*=>)/m',
+        static fn (array $m): string =>
+            $m[1] . "'admin_user' => " . var_export($kullanici, true) . ",\n" . $m[1] . $m[2],
+        $new,
+        1
+    );
+}
+
 file_put_contents($config, $new);
 
 // Yazdiktan sonra dogrula - sessiz bozulmayi burada yakalariz.
-$check = require $config;
-if (!password_verify(getenv("MT_NEW_PASS"), $check["admin_hash"])) {
-    fwrite(STDERR, "HATA: Parola yazildi ama dogrulanamadi. Degisiklik geri alinmali.\n");
+$kontrol = require $config;
+if (!password_verify($parola, $kontrol['admin_hash'])
+    || ($kontrol['admin_user'] ?? null) !== $kullanici) {
+    fwrite(STDERR, "HATA: Bilgiler yazildi ama dogrulanamadi. Degisiklik geri alindi.\n");
     file_put_contents($config, $src);
     exit(1);
 }
-echo "Parola guncellendi ve dogrulandi.\n";
-' "$CONFIG"
 
-unset MT_NEW_PASS
+echo "Kullanici adi ve parola guncellendi, dogrulandi.\n";
+PHPKODU
+
+# Degerleri ortam degiskeniyle veriyoruz; komut satirinda gorunmezler,
+# boylece 'ps' ciktisina ve kabuk gecmisine dusmezler.
+MT_NEW_PASS="$P1" MT_NEW_USER="$KUL" php "$YAZICI" "$CONFIG"
+
+unset MT_NEW_PASS MT_NEW_USER
 chmod 600 "$CONFIG"
 
 echo
 echo "Tamam. Panel: https://celaning.com/mt/admin.php"
+echo "Kullanici adi: $KUL"
 echo "Bu dosyayi silebilirsiniz: rm ~/parola-belirle.sh"

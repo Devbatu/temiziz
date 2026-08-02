@@ -9,8 +9,18 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+// @next/env bir CommonJS modülü: adlandırılmış içe aktarım ESM'de çalışmaz.
+import nextEnv from '@next/env';
 
 const root = process.cwd();
+
+/**
+ * .env dosyalarını bu sarmalayıcının kendi ortamına da yükle.
+ * `next build` bunu kendi içinde yapar, ama bu script düz Node olarak çalışır;
+ * yüklemezsek NEXT_PUBLIC_* değerlerini boş görür ve aşağıdaki ads.txt üretimi
+ * sessizce BOŞ bir dosya yazar.
+ */
+nextEnv.loadEnvConfig(root);
 const stash = path.join(root, '.static-stash');
 
 /** Statik derlemede çıkarılacak sunucu rotaları. */
@@ -57,6 +67,15 @@ try {
   }
   if (process.env.ADS_TXT_EXTRA) {
     adsLines.push(...process.env.ADS_TXT_EXTRA.split('\n').map((l) => l.trim()).filter(Boolean));
+  }
+  if (adsLines.length === 0) {
+    // Boş bir ads.txt yayına alınırsa sunucudaki geçerli dosyanın üzerine yazar
+    // ve AdSense sitedeki reklamları "yetkisiz satıcı" sayarak durdurur.
+    // Sessizce devam etmek yerine derlemeyi burada kesiyoruz.
+    throw new Error(
+      'ads.txt boş kalacaktı: NEXT_PUBLIC_ADSENSE_CLIENT okunamadı. ' +
+        '.env dosyasında ca-pub- ile başlayan değerin tanımlı olduğunu doğrulayın.',
+    );
   }
   fs.mkdirSync(path.join(root, 'public'), { recursive: true });
   fs.writeFileSync(path.join(root, 'public/ads.txt'), adsLines.join('\n') + '\n');

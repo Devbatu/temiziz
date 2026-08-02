@@ -53,7 +53,7 @@ export function Header() {
               <Link
                 key={c.id}
                 href={`/category/${c.slug}`}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-black/5 hover:text-[var(--fg)] dark:hover:bg-white/10"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted hover-surface transition-colors hover:text-[var(--fg)]"
               >
                 <Icon name={c.icon} className="h-4 w-4" />
                 {c.short}
@@ -64,7 +64,7 @@ export function Header() {
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setOpen(true)}
-              className="flex h-9 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-muted transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              className="flex h-9 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-muted transition-colors hover-surface"
             >
               <Search className="h-4 w-4" />
               <span className="hidden sm:inline">Araç ara…</span>
@@ -97,7 +97,7 @@ export function Header() {
                   key={c.id}
                   href={`/category/${c.slug}`}
                   onClick={() => setMenu(false)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover-surface"
                 >
                   <Icon name={c.icon} className="h-4 w-4 text-brand-500" />
                   {c.short}

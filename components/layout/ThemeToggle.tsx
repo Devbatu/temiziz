@@ -28,7 +28,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark ? 'Aydınlık temaya geç' : 'Karanlık temaya geç'}
-      className="relative grid h-9 w-9 place-items-center rounded-xl border border-[var(--border)] transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+      className="relative grid h-9 w-9 place-items-center rounded-xl border border-[var(--border)] transition-colors hover-surface"
     >
       {ready && (dark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />)}
     </button>

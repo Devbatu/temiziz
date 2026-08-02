@@ -61,7 +61,7 @@ export function Button({
   const styles =
     variant === 'primary'
       ? 'bg-gradient-to-r from-brand-600 to-violet-600 text-white shadow-lg shadow-brand-600/20 hover:-translate-y-0.5'
-      : 'border border-[var(--border)] hover:bg-black/5 dark:hover:bg-white/10';
+      : 'border border-[var(--border)] hover-surface';
   return (
     <button
       type="button"

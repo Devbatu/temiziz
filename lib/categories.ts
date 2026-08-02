@@ -5,7 +5,9 @@ export type CategoryId =
   | 'seo'
   | 'developer'
   | 'utility'
-  | 'website';
+  | 'website'
+  | 'health'
+  | 'business';
 
 export interface Category {
   id: CategoryId;
@@ -85,6 +87,28 @@ export const categories: Category[] = [
     gradient: 'from-amber-500 to-yellow-500',
     accent: '#f59e0b',
     icon: 'Wrench',
+  },
+  {
+    id: 'health',
+    slug: 'saglik',
+    name: 'Sağlık Hesaplayıcıları',
+    short: 'Sağlık',
+    description:
+      'Sağlık profesyonelleri için klinik skor ve hesaplama araçları: BKİ, eGFR, CHA₂DS₂-VASc, Wells, MELD, Child-Pugh, Glasgow, CURB-65 ve TIMI.',
+    gradient: 'from-red-500 to-pink-600',
+    accent: '#ef4444',
+    icon: 'HeartPulse',
+  },
+  {
+    id: 'business',
+    slug: 'meslek',
+    name: 'Meslek Araçları',
+    short: 'Meslek',
+    description:
+      'Muhasebeci, mali müşavir, avukat, öğretmen ve inşaatçılar için KDV, kâr marjı, kredi, tazminat, not ortalaması ve keşif hesaplayıcıları.',
+    gradient: 'from-indigo-500 to-blue-600',
+    accent: '#6366f1',
+    icon: 'Briefcase',
   },
   {
     id: 'website',

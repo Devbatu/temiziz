@@ -32,6 +32,8 @@ const pdfConv = () => import('./pdf-convert-tools');
 const net = () => import('./network-tools');
 const web = () => import('./website-tools');
 const ai = () => import('./AiTool');
+const health = () => import('./health-tools');
+const business = () => import('./business-tools');
 
 /**
  * slug → interactive widget.
@@ -127,6 +129,29 @@ export const toolComponents: Record<string, ComponentType> = {
   'ai-rewrite-tool': lazy(() => ai().then((m) => m.AiRewriteTool)),
   'ai-hashtag-generator': lazy(() => ai().then((m) => m.AiHashtagGenerator)),
   'ai-title-generator': lazy(() => ai().then((m) => m.AiTitleGenerator)),
+
+  // saglik hesaplayicilari
+  'bmi-hesaplama': lazy(() => health().then((m) => m.Bmi)),
+  'egfr-hesaplama': lazy(() => health().then((m) => m.Egfr)),
+  'chads-vasc-hesaplama': lazy(() => health().then((m) => m.ChadsVasc)),
+  'wells-pe-skoru': lazy(() => health().then((m) => m.WellsPe)),
+  'wells-dvt-skoru': lazy(() => health().then((m) => m.WellsDvt)),
+  'apgar-skoru': lazy(() => health().then((m) => m.Apgar)),
+  'child-pugh-skoru': lazy(() => health().then((m) => m.ChildPugh)),
+  'meld-skoru': lazy(() => health().then((m) => m.Meld)),
+  'glasgow-koma-skalasi': lazy(() => health().then((m) => m.Gks)),
+  'curb-65-skoru': lazy(() => health().then((m) => m.Curb65)),
+  'timi-skoru': lazy(() => health().then((m) => m.Timi)),
+
+  // meslek araclari
+  'kdv-hesaplama': lazy(() => business().then((m) => m.KdvHesaplama)),
+  'kar-marji-hesaplama': lazy(() => business().then((m) => m.KarMarji)),
+  'kredi-taksit-hesaplama': lazy(() => business().then((m) => m.KrediTaksit)),
+  'kidem-tazminati-hesaplama': lazy(() => business().then((m) => m.KidemTazminati)),
+  'not-ortalamasi-hesaplama': lazy(() => business().then((m) => m.NotOrtalamasi)),
+  'demir-agirlik-hesaplama': lazy(() => business().then((m) => m.DemirAgirlik)),
+  'beton-hesaplama': lazy(() => business().then((m) => m.BetonHesaplama)),
+  'gecikme-faizi-hesaplama': lazy(() => business().then((m) => m.GecikmeFaizi)),
 };
 
 export function ToolRuntime({ slug, name }: { slug: string; name: string }) {

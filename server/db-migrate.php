@@ -120,6 +120,34 @@ $yeniTablolar = [
 
     // Etkilesim kayitlari (fare yolu, tiklama, hover, kaydirma).
     // METIN ICERMEZ - bkz. components/analytics/Recorder.ts
+    'mt_messages' => "CREATE TABLE mt_messages (
+        id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        ad           VARCHAR(80)  NOT NULL,
+        eposta       VARCHAR(190) NOT NULL,
+        konu         VARCHAR(160) NOT NULL DEFAULT '',
+        mesaj        TEXT         NOT NULL,
+        durum        ENUM('yeni','okundu','arsiv') NOT NULL DEFAULT 'yeni',
+        visitor_hash CHAR(16)     DEFAULT NULL,
+        user_agent   VARCHAR(255) DEFAULT NULL,
+        created_at   DATETIME     NOT NULL,
+        PRIMARY KEY (id),
+        KEY idx_durum (durum, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+    'mt_comments' => "CREATE TABLE mt_comments (
+        id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        post_id      INT UNSIGNED NOT NULL,
+        ad           VARCHAR(60)  NOT NULL,
+        eposta       VARCHAR(190) NOT NULL DEFAULT '',
+        govde        TEXT         NOT NULL,
+        durum        ENUM('bekliyor','onayli','spam') NOT NULL DEFAULT 'bekliyor',
+        visitor_hash CHAR(16)     DEFAULT NULL,
+        created_at   DATETIME     NOT NULL,
+        PRIMARY KEY (id),
+        KEY idx_post (post_id, durum, created_at),
+        KEY idx_durum (durum, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
     'mt_replays' => "CREATE TABLE mt_replays (
         id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         visitor_hash CHAR(16)     NOT NULL,

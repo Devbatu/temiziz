@@ -79,7 +79,6 @@ $sure   = (int) $k['duration_ms'];
 <meta http-equiv="Content-Security-Policy" content="<?= h($mtCsp) ?>">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<meta name="robots" content="noindex,nofollow">
 <title>Kayit oynatici</title>
 <style>
   :root{--bg:#0b0f1c;--card:#141a2e;--line:#232b45;--fg:#e9edf7;--muted:#8d97b4;--accent:#5b8cff}
@@ -94,10 +93,16 @@ $sure   = (int) $k['duration_ms'];
        border-radius:9px;background:transparent;color:var(--fg);font-size:13.5px;cursor:pointer;text-decoration:none}
   button.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
   .stage{position:relative;background:#000;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .stage iframe{display:block;border:0;background:#fff;transform-origin:0 0}
+  /* iframe bir VIDEO KARESI gibi davranmali: icindeki baglantiya tiklanirsa
+     cerceve baska sayfaya gider ve kayit bozulur. pointer-events kapatiliyor,
+     ustune de ayrica saydam bir kalkan koyuluyor (eski tarayicilarda
+     pointer-events iframe'de guvenilir degil). */
+  .stage iframe{display:block;border:0;background:#fff;transform-origin:0 0;
+       pointer-events:none;user-select:none}
+  #kalkan{position:absolute;inset:0;z-index:4;cursor:default;background:transparent}
   #cursor{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
           background:rgba(91,140,255,.85);box-shadow:0 0 0 4px rgba(91,140,255,.22);
-          pointer-events:none;transition:left .22s linear,top .22s linear;z-index:5}
+          pointer-events:none;z-index:5}
   #ripple{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
           border:2px solid #fbbf24;opacity:0;pointer-events:none;z-index:6}
   .ctrl{display:flex;align-items:center;gap:12px;margin-top:12px;background:var(--card);
@@ -111,6 +116,8 @@ $sure   = (int) $k['duration_ms'];
   .log ol{margin:0;padding-left:20px}
   .log li{margin:3px 0;font-size:13px;color:#c8d0e4}
   .log li b{color:#8fd3ff}
+  .log li.on{background:rgba(91,140,255,.16);border-radius:5px;
+             margin-left:-6px;padding:1px 6px;color:#fff}
   .warn{margin-top:14px;color:var(--muted);font-size:12.5px;line-height:1.65;
         border-top:1px solid var(--line);padding-top:12px}
 </style>
@@ -135,7 +142,9 @@ $sure   = (int) $k['duration_ms'];
 
   <div class="stage" id="stage">
     <iframe id="frame" title="Kayit onizleme" sandbox="allow-same-origin"
+            tabindex="-1" aria-hidden="true"
             src="<?= h($siteUrl . (string) $k['path']) ?>"></iframe>
+    <div id="kalkan"></div>
     <div id="cursor"></div>
     <div id="ripple"></div>
   </div>
@@ -190,17 +199,21 @@ $sure   = (int) $k['duration_ms'];
   function layout() {
     var w = stage.clientWidth;
     var scale = Math.min(1, w / VW);
-    frame.style.width  = VW + 'px';
-    frame.style.height = VH + 'px';
-    frame.style.transform = 'scale(' + scale + ')';
+    frame.style.width = VW + 'px';
+    /* iframe BELGENIN TAM BOYUNDA olusturulur. Yalnizca ekran yuksekligi
+       kadar yapilirsa sayfanin alt kismi hic render edilmez ve kaydirma
+       canlandirildiginda ekrana siyahlik gelir. Sahne (overflow:hidden)
+       ziyaretcinin ekranini temsil eden pencere gorevi gorur. */
+    frame.style.height = DH + 'px';
     stage.style.height = Math.round(VH * scale) + 'px';
     return scale;
   }
   var scale = layout();
-  window.addEventListener('resize', function () { scale = layout(); });
+  window.addEventListener('resize', function () { scale = layout(); yerlestir(); });
 
   // Etkilesim dokumu
   var TUR = { 1: 'Tikladi', 2: 'Uzerinde bekledi', 3: 'Kaydirdi' };
+  var satirlar = [];   // dokumdeki <li> ogeleri, zamana gore vurgulanir
   FRAMES.forEach(function (f) {
     if (f[0] === 0) return; // fare hareketini dokume yazmiyoruz, cok kalabalik
     var li = document.createElement('li');
@@ -213,6 +226,8 @@ $sure   = (int) $k['duration_ms'];
     } else {
       li.textContent = sn + ' — Kaydirdi: %' + Math.round(f[2] / 10);
     }
+    li.dataset.t = f[1];
+    satirlar.push(li);
     list.appendChild(li);
   });
 
@@ -227,6 +242,19 @@ $sure   = (int) $k['duration_ms'];
   var lastTick = 0;
   var rate = 1;
   var shownClick = -1;
+  var kaydirmaPx = 0;   // sayfanin o anki kaydirma konumu (olceklenmemis px)
+  var sonFare = null;
+  var etkinSatir = -1;
+
+  /** iframe'i ve imleci o anki kaydirma konumuna gore yerlestirir. */
+  function yerlestir() {
+    frame.style.transform = 'scale(' + scale + ') translateY(' + (-kaydirmaPx) + 'px)';
+    if (sonFare) {
+      var docY = (sonFare[3] / 1000) * DH;
+      cursor.style.left = ((sonFare[2] / 1000) * VW * scale) + 'px';
+      cursor.style.top  = ((docY - kaydirmaPx) * scale) + 'px';
+    }
+  }
 
   function apply(time) {
     var mouse = null, scroll = null, hover = null;
@@ -241,28 +269,41 @@ $sure   = (int) $k['duration_ms'];
       }
     }
 
-    // Kaydirma: iframe icini kaydirmak yerine iframe'i yukari kaydiriyoruz;
-    // sandbox nedeniyle icerige eristigimiz garanti degil.
-    var scrollPx = scroll ? (scroll[2] / 1000) * Math.max(DH - VH, 0) : 0;
-    frame.style.transform = 'scale(' + scale + ') translateY(' + (-scrollPx) + 'px)';
-
-    if (mouse) {
-      // Fare konumu belge yuksekligine gore kaydedildi; ekrandaki yerine cevir.
-      var docY = (mouse[3] / 1000) * DH;
-      cursor.style.left = ((mouse[2] / 1000) * VW * scale) + 'px';
-      cursor.style.top  = ((docY - scrollPx) * scale) + 'px';
-    }
+    /* Kaydirma: iframe icini kaydirmak yerine tam boy iframe'i yukari
+       kaydiriyoruz; sandbox altinda icerige erisebildigimiz garanti degil. */
+    kaydirmaPx = scroll ? (scroll[2] / 1000) * Math.max(DH - VH, 0) : 0;
+    if (mouse) { sonFare = mouse; }
+    yerlestir();
 
     note.textContent = hover ? 'Uzerinde bekliyor: ' + hover[2] : '';
     seek.value = time;
     clock.textContent = (time / 1000).toFixed(1) + ' / ' + (TOTAL / 1000).toFixed(1) + ' sn';
+    dokumuIsaretle(time);
+  }
+
+  /** Dokumde o ana denk gelen son satiri vurgular ve gorunur alana getirir. */
+  function dokumuIsaretle(time) {
+    var yeni = -1;
+    for (var i = 0; i < satirlar.length; i++) {
+      if (+satirlar[i].dataset.t <= time) { yeni = i; } else { break; }
+    }
+    if (yeni === etkinSatir) { return; }
+    if (satirlar[etkinSatir]) { satirlar[etkinSatir].classList.remove('on'); }
+    etkinSatir = yeni;
+    if (satirlar[yeni]) {
+      satirlar[yeni].classList.add('on');
+      var kutu = satirlar[yeni].parentNode.parentNode;   // .log
+      var ust  = satirlar[yeni].offsetTop - kutu.offsetTop;
+      if (ust < kutu.scrollTop || ust > kutu.scrollTop + kutu.clientHeight - 30) {
+        kutu.scrollTop = ust - kutu.clientHeight / 2;
+      }
+    }
   }
 
   function flash(f) {
     var docY = (f[3] / 1000) * DH;
-    var scrollPx = parseFloat((frame.style.transform.match(/translateY\((-?[\d.]+)px\)/) || [0, 0])[1]) * -1;
     ripple.style.left = ((f[2] / 1000) * VW * scale) + 'px';
-    ripple.style.top  = ((docY - scrollPx) * scale) + 'px';
+    ripple.style.top  = ((docY - kaydirmaPx) * scale) + 'px';
     ripple.style.transition = 'none';
     ripple.style.opacity = '1';
     ripple.style.transform = 'scale(.4)';
@@ -284,16 +325,31 @@ $sure   = (int) $k['duration_ms'];
   }
 
   function start() {
-    if (t >= TOTAL) { t = 0; shownClick = -1; }
+    if (t >= TOTAL) { t = 0; shownClick = -1; etkinSatir = -1; }
     playing = true;
     lastTick = 0;
+    gecisAyarla(250 / rate);
     playBtn.innerHTML = '&#10073;&#10073; Duraklat';
     requestAnimationFrame(tick);
   }
   function stop() {
     playing = false;
+    gecisAyarla(0);
     playBtn.innerHTML = '&#9654; Oynat';
   }
+
+  /**
+   * Kayit 250 ms araliklarla ornekleniyor; imlec ve sayfa bu sureye yayilarak
+   * kayarsa hareket akici gorunur. Hiz carpani artinca sure de kisalmali,
+   * yoksa imlec goruntunun gerisinde kalir. Ileri/geri sarmada 0 verilir ki
+   * imlec araya animasyon koymadan dogru yere atlasin.
+   */
+  function gecisAyarla(ms) {
+    var g = ms > 0 ? ms + 'ms linear' : '0s';
+    cursor.style.transition = 'left ' + g + ', top ' + g;
+    frame.style.transition  = 'transform ' + g;
+  }
+  gecisAyarla(0);
 
   playBtn.addEventListener('click', function () { playing ? stop() : start(); });
   speedBtn.addEventListener('click', function () {
@@ -301,14 +357,16 @@ $sure   = (int) $k['duration_ms'];
     rate = d[(d.indexOf(x) + 1) % d.length];
     speedBtn.dataset.x = rate;
     speedBtn.textContent = rate + '×';
+    if (playing) { gecisAyarla(250 / rate); }
   });
   seek.addEventListener('input', function () {
+    gecisAyarla(0);
     t = +seek.value;
     shownClick = -1;
     apply(t);
   });
 
-  frame.addEventListener('load', function () { apply(0); });
+  frame.addEventListener('load', function () { apply(t); });
   apply(0);
 })();
 </script>

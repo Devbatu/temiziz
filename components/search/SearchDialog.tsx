@@ -109,7 +109,7 @@ export function SearchDialog({
                 onMouseEnter={() => setActive(i)}
                 onClick={() => go(tool.slug)}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                  i === active ? 'bg-black/5 dark:bg-white/10' : ''
+                  i === active ? 'is-active' : ''
                 }`}
               >
                 <span

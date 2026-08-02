@@ -254,17 +254,73 @@ function mt_apply_head(string $before, array $post, string $canonical): string
         1
     ) ?? $before;
 
-    // BlogPosting semasi: arama sonuclarinda tarih ve yazar gosterimi saglar.
+    /**
+     * Sosyal medya etiketleri.
+     *
+     * Sayfa iskeleti Next.js'in urettigi bir sayfadan kopyalandigi icin
+     * og:title / og:url gibi alanlar O SAYFANIN degerlerini tasir. Duzeltilmezse
+     * her blog yazisi paylasildiginda ana sayfanin basligiyla ve ana sayfaya
+     * isaret ederek gorunur; yazinin kendisine tiklama gelmez.
+     */
+    $ogBaslik = htmlspecialchars($post['title'], ENT_QUOTES, 'UTF-8');
+    $ogUrl    = htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8');
+    $ogGorsel = rtrim(mt_config()['site_url'], '/') . '/og-cover.png';
+
+    /** Belirtilen meta etiketinin content degerini degistirir; yoksa ekler. */
+    $metaYaz = static function (string $html, string $tur, string $ad, string $deger): string {
+        $etiket = '<meta ' . $tur . '="' . $ad . '" content="' . $deger . '"/>';
+        $desen  = '#<meta ' . $tur . '="' . preg_quote($ad, '#') . '" content="[^"]*"\s*/?>#';
+        if (preg_match($desen, $html)) {
+            return preg_replace($desen, $etiket, $html, 1) ?? $html;
+        }
+        return str_replace('</head>', $etiket . '</head>', $html);
+    };
+
+    $before = $metaYaz($before, 'property', 'og:title', $ogBaslik);
+    $before = $metaYaz($before, 'property', 'og:description', $desc);
+    $before = $metaYaz($before, 'property', 'og:url', $ogUrl);
+    $before = $metaYaz($before, 'property', 'og:type', 'article');
+    $before = $metaYaz($before, 'property', 'og:image', $ogGorsel);
+    $before = $metaYaz($before, 'property', 'article:published_time', $post['published_at']);
+    $before = $metaYaz($before, 'property', 'article:modified_time', $post['updated_at']);
+    $before = $metaYaz($before, 'name', 'twitter:title', $ogBaslik);
+    $before = $metaYaz($before, 'name', 'twitter:description', $desc);
+    $before = $metaYaz($before, 'name', 'twitter:image', $ogGorsel);
+    $before = $metaYaz($before, 'name', 'twitter:card', 'summary_large_image');
+
+    /**
+     * BlogPosting: arama sonuclarinda tarih ve yazar gosterimi saglar.
+     * BreadcrumbList: sonucta URL yerine "Ana sayfa > Blog > Yazi" yolunu
+     * gosterir; tiklama oranini olcculebilir sekilde artirir.
+     */
+    $kok    = rtrim(mt_config()['site_url'], '/');
     $schema = [
-        '@context'         => 'https://schema.org',
-        '@type'            => 'BlogPosting',
-        'headline'         => $post['title'],
-        'description'      => $post['excerpt'],
-        'datePublished'    => $post['published_at'],
-        'dateModified'     => $post['updated_at'],
-        'author'           => ['@type' => 'Organization', 'name' => 'MultiTools'],
-        'publisher'        => ['@type' => 'Organization', 'name' => 'MultiTools'],
-        'mainEntityOfPage' => $canonical,
+        '@context' => 'https://schema.org',
+        '@graph'   => [
+            [
+                '@type'            => 'BlogPosting',
+                'headline'         => $post['title'],
+                'description'      => $post['excerpt'],
+                'image'            => $ogGorsel,
+                'datePublished'    => $post['published_at'],
+                'dateModified'     => $post['updated_at'],
+                'author'           => ['@type' => 'Organization', 'name' => 'MultiTools'],
+                'publisher'        => [
+                    '@type' => 'Organization',
+                    'name'  => 'MultiTools',
+                    'logo'  => ['@type' => 'ImageObject', 'url' => $kok . '/favicon.svg'],
+                ],
+                'mainEntityOfPage' => $canonical,
+            ],
+            [
+                '@type'           => 'BreadcrumbList',
+                'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Ana sayfa', 'item' => $kok . '/'],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blog', 'item' => $kok . '/blog/'],
+                    ['@type' => 'ListItem', 'position' => 3, 'name' => $post['title'], 'item' => $canonical],
+                ],
+            ],
+        ],
     ];
     $json = str_replace(
         ['<', '>', '&'],
@@ -305,6 +361,167 @@ function mt_tool_name(string $slug): ?string
 }
 
 /** Yazi sonundaki "Bu yazida gecen araclar" bolumu. */
+/**
+ * Ayni kategoriden en yeni uc yazi. Ziyaretciyi sitede tutar ve yazilari
+ * birbirine baglayarak arama motoruna konu butunlugu gosterir.
+ */
+function mt_ilgili_yazilar_html(array $post): string
+{
+    $st = mt_db()->prepare(
+        'SELECT slug, title, excerpt, reading_time FROM mt_posts
+         WHERE status = "published" AND id <> :id
+         ORDER BY (category = :kat) DESC, published_at DESC
+         LIMIT 3'
+    );
+    $st->execute([':id' => (int) $post['id'], ':kat' => (string) $post['category']]);
+    $liste = $st->fetchAll();
+    if ($liste === []) {
+        return '';
+    }
+
+    $kart = '';
+    foreach ($liste as $y) {
+        $kart .= '<a href="/blog/' . htmlspecialchars($y['slug'], ENT_QUOTES, 'UTF-8') . '/"'
+            . ' class="surface group flex flex-col rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">'
+            . '<span class="text-sm font-bold leading-snug group-hover:text-brand-500">'
+            . htmlspecialchars($y['title'], ENT_QUOTES, 'UTF-8') . '</span>'
+            . '<span class="mt-1.5 text-xs leading-relaxed text-muted">'
+            . htmlspecialchars(mb_substr((string) $y['excerpt'], 0, 95), ENT_QUOTES, 'UTF-8') . '…</span>'
+            . '<span class="mt-2 text-[11px] text-muted">' . (int) $y['reading_time'] . ' dk okuma</span></a>';
+    }
+
+    return '<section class="mt-14"><h2 class="text-lg font-bold">Bunlar da ilginizi çekebilir</h2>'
+        . '<div class="mt-4 grid gap-3 sm:grid-cols-3">' . $kart . '</div></section>';
+}
+
+/**
+ * Onaylanmis yorumlar ve yorum formu.
+ *
+ * Yorumlar sayfa uretilirken HTML'e gomulur; ziyaretci tarafinda hicbir sorgu
+ * calismaz. Yeni yorum onaylandiginda sayfa yeniden uretilir.
+ */
+function mt_yorumlar_html(array $post): string
+{
+    $st = mt_db()->prepare(
+        'SELECT ad, govde, created_at FROM mt_comments
+         WHERE post_id = ? AND durum = "onayli" ORDER BY created_at ASC'
+    );
+    $st->execute([(int) $post['id']]);
+    $yorumlar = $st->fetchAll();
+
+    $liste = '';
+    foreach ($yorumlar as $y) {
+        $bas = mb_strtoupper(mb_substr((string) $y['ad'], 0, 1), 'UTF-8');
+        $liste .= '<li class="flex gap-3 border-t border-[var(--border)] py-4">'
+            . '<span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br'
+            . ' from-brand-500 to-violet-600 text-sm font-bold text-white">'
+            . htmlspecialchars($bas, ENT_QUOTES, 'UTF-8') . '</span>'
+            . '<div class="min-w-0"><div class="flex flex-wrap items-baseline gap-2">'
+            . '<span class="text-sm font-bold">' . htmlspecialchars($y['ad'], ENT_QUOTES, 'UTF-8') . '</span>'
+            . '<span class="text-xs text-muted">'
+            . htmlspecialchars(date('d.m.Y', strtotime((string) $y['created_at'])), ENT_QUOTES, 'UTF-8')
+            . '</span></div>'
+            . '<p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-muted">'
+            . htmlspecialchars($y['govde'], ENT_QUOTES, 'UTF-8') . '</p></div></li>';
+    }
+
+    $sayi   = count($yorumlar);
+    $baslik = $sayi === 0 ? 'Yorumlar' : $sayi . ' yorum';
+    $bos    = $sayi === 0
+        ? '<p class="mt-3 text-sm text-muted">Bu yazıya henüz yorum yapılmadı. İlk yorumu siz yazın.</p>'
+        : '';
+
+    $girdi = 'w-full rounded-xl border border-[var(--border)] bg-transparent px-3.5 py-2.5'
+        . ' text-sm outline-none focus:ring-2 focus:ring-brand-500/40';
+
+    $form = '<form id="mt-yorum" class="surface mt-6 rounded-2xl p-5">'
+        . '<h3 class="text-sm font-bold">Yorum yazın</h3>'
+        . '<p class="mt-1 text-xs text-muted">'
+        . 'Yorumunuz yayımlanmadan önce incelenir. E-posta adresi zorunlu değildir ve yayımlanmaz.</p>'
+        . '<div class="mt-4 grid gap-3 sm:grid-cols-2">'
+        . '<input name="ad" required maxlength="60" placeholder="Adınız" class="' . $girdi . '">'
+        . '<input name="eposta" type="email" maxlength="190" placeholder="E-posta (isteğe bağlı)" class="' . $girdi . '">'
+        . '</div>'
+        . '<textarea name="govde" required maxlength="2000" rows="4" placeholder="Yorumunuz…"'
+        . ' class="mt-3 ' . $girdi . '"></textarea>'
+        . '<input name="website" tabindex="-1" autocomplete="off" aria-hidden="true"'
+        . ' style="position:absolute;left:-9999px;width:1px;height:1px">'
+        . '<div class="mt-3 flex flex-wrap items-center gap-3">'
+        . '<button type="submit" class="rounded-xl bg-gradient-to-r from-brand-600 to-violet-600'
+        . ' px-5 py-2.5 text-sm font-semibold text-white">Gönder</button>'
+        . '<span id="mt-yorum-not" class="text-xs text-muted"></span></div></form>';
+
+    return '<section class="mt-14" id="yorumlar">'
+        . '<h2 class="text-lg font-bold">' . $baslik . '</h2>'
+        . $bos
+        . ($liste !== '' ? '<ul class="mt-2">' . $liste . '</ul>' : '')
+        . $form
+        . '</section>';
+}
+
+/** Yorum formunu calistiran saf JavaScript; React yuklenmiyor. */
+function mt_yorum_betigi(): string
+{
+    $ucJs = json_encode(
+        rtrim(mt_config()['site_url'], '/') . '/mt/gonder.php',
+        JSON_UNESCAPED_SLASHES
+    );
+
+    return <<<HTML
+<script>
+(function () {
+  var form = document.getElementById('mt-yorum');
+  if (!form) { return; }
+  var not = document.getElementById('mt-yorum-not');
+  /* Form acilis zamani: 3 saniyeden hizli gonderimi sunucu reddeder. */
+  var acilis = Date.now();
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    not.textContent = 'Gönderiliyor…';
+
+    var d = new FormData(form);
+    fetch({$ucJs}, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        tur: 'yorum',
+        slug: location.pathname.replace(/^\/blog\//, '').replace(/\/$/, ''),
+        ad: d.get('ad'),
+        eposta: d.get('eposta'),
+        govde: d.get('govde'),
+        website: d.get('website'),
+        t: acilis
+      })
+    })
+      .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+      .then(function (j) {
+        if (j && j.ok) {
+          form.innerHTML = '<p class="text-sm font-semibold">Yorumunuz alındı.</p>'
+            + '<p class="mt-1 text-xs text-muted">İncelendikten sonra yayımlanacak.</p>';
+          return;
+        }
+        var m = {
+          ad: 'Adınızı yazın.', yorum: 'Yorum çok kısa.',
+          spam: 'Yorumda çok fazla bağlantı var.', eposta: 'E-posta adresi geçersiz.',
+          limit: 'Çok fazla gönderim yapıldı. Biraz sonra tekrar deneyin.',
+          'cok-hizli': 'Biraz daha yavaş.'
+        };
+        not.textContent = (j && m[j.hata]) || 'Gönderilemedi, tekrar deneyin.';
+        btn.disabled = false;
+      })
+      .catch(function () {
+        not.textContent = 'Bağlantı hatası. Tekrar deneyin.';
+        btn.disabled = false;
+      });
+  });
+})();
+</script>
+HTML;
+}
+
 function mt_related_tools_html(string $csv): string
 {
     $slugs = array_filter(array_map('trim', explode(',', $csv)));
@@ -368,7 +585,10 @@ function mt_write_post(array $post): bool
         . mt_markdown((string) $post['body'])
         . '</div>'
         . mt_related_tools_html((string) ($post['related_tools'] ?? ''))
-        . '</article>';
+        . mt_ilgili_yazilar_html($post)
+        . mt_yorumlar_html($post)
+        . '</article>'
+        . mt_yorum_betigi();
 
     $html = mt_apply_head($shell['before'], $post, $canonical) . $body . $shell['after'];
 
@@ -380,6 +600,47 @@ function mt_write_post(array $post): bool
 }
 
 /** Blog liste sayfasini yeniden yazar. */
+/** Blog listesindeki kategori suzgecini calistiran saf JavaScript. */
+function mt_liste_betigi(): string
+{
+    return <<<'HTML'
+<script>
+(function () {
+  var dugmeler = document.querySelectorAll('.mt-filtre');
+  var kartlar  = document.querySelectorAll('.mt-kart');
+  var bos      = document.getElementById('mt-bos');
+  if (!dugmeler.length) { return; }
+
+  function secili(btn) {
+    dugmeler.forEach(function (d) {
+      var aktif = d === btn;
+      /* Secili dugme marka rengiyle isaretlenir. */
+      d.classList.toggle('border-brand-500', aktif);
+      d.classList.toggle('text-brand-500', aktif);
+      d.setAttribute('aria-pressed', aktif ? 'true' : 'false');
+    });
+  }
+
+  dugmeler.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var f = btn.getAttribute('data-filtre');
+      var gorunen = 0;
+      kartlar.forEach(function (k) {
+        var goster = f === 'hepsi' || k.getAttribute('data-kat') === f;
+        k.classList.toggle('hidden', !goster);
+        if (goster) { gorunen++; }
+      });
+      bos.classList.toggle('hidden', gorunen > 0);
+      secili(btn);
+    });
+  });
+
+  secili(dugmeler[0]);
+})();
+</script>
+HTML;
+}
+
 function mt_write_index(): bool
 {
     $shell = mt_page_shell();
@@ -390,10 +651,19 @@ function mt_write_index(): bool
         'SELECT * FROM mt_posts WHERE status = "published" ORDER BY published_at DESC'
     )->fetchAll();
 
+    // Kategori suzgecinde kullanilmak uzere kategori adlarini topla.
+    $kategoriler = [];
+    foreach ($posts as $p) {
+        $k = (string) $p['category'];
+        $kategoriler[$k] = ($kategoriler[$k] ?? 0) + 1;
+    }
+    ksort($kategoriler);
+
     $cards = '';
     foreach ($posts as $p) {
         $cards .= '<a href="/blog/' . htmlspecialchars($p['slug'], ENT_QUOTES, 'UTF-8') . '/"'
-            . ' class="surface group flex flex-col rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl">'
+            . ' data-kat="' . htmlspecialchars($p['category'], ENT_QUOTES, 'UTF-8') . '"'
+            . ' class="mt-kart surface group flex flex-col rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl">'
             . '<span class="text-[11px] font-bold uppercase tracking-wider text-brand-500">'
             . htmlspecialchars($p['category'], ENT_QUOTES, 'UTF-8') . '</span>'
             . '<h2 class="mt-2 text-xl font-bold leading-snug group-hover:text-brand-500">'
@@ -407,10 +677,26 @@ function mt_write_index(): bool
         $cards = '<p class="text-muted">Henüz yazı yayınlanmadı.</p>';
     }
 
+    // Suzgec dugmeleri. Tum yazilar zaten sayfada; suzme istemcide yapilir,
+    // bu yuzden her kategori icin ayri sayfa uretmeye ve ek istege gerek yok.
+    $suzgec = '<button type="button" data-filtre="hepsi"'
+        . ' class="mt-filtre rounded-xl border border-[var(--border)] px-3.5 py-2 text-sm font-semibold">'
+        . 'Tümü (' . count($posts) . ')</button>';
+    foreach ($kategoriler as $ad => $adet) {
+        $suzgec .= '<button type="button" data-filtre="' . htmlspecialchars($ad, ENT_QUOTES, 'UTF-8') . '"'
+            . ' class="mt-filtre rounded-xl border border-[var(--border)] px-3.5 py-2 text-sm font-semibold">'
+            . htmlspecialchars($ad, ENT_QUOTES, 'UTF-8') . ' (' . (int) $adet . ')</button>';
+    }
+
     $body = '<div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">'
         . '<h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Blog</h1>'
-        . '<p class="mt-3 max-w-2xl text-muted">Araçlardan en iyi verimi almanız için pratik rehberler.</p>'
-        . '<div class="mt-10 grid gap-4 sm:grid-cols-2">' . $cards . '</div></div>';
+        . '<p class="mt-3 max-w-2xl text-muted">'
+        . 'Araçlardan en iyi verimi almanız için pratik rehberler — ' . count($posts) . ' yazı.</p>'
+        . ($kategoriler !== [] ? '<div class="mt-6 flex flex-wrap gap-2">' . $suzgec . '</div>' : '')
+        . '<div id="mt-liste" class="mt-8 grid gap-4 sm:grid-cols-2">' . $cards . '</div>'
+        . '<p id="mt-bos" class="mt-6 hidden text-sm text-muted">Bu kategoride yazı yok.</p>'
+        . '</div>'
+        . mt_liste_betigi();
 
     $head = preg_replace(
         '#<link rel="canonical" href="[^"]*"\s*/?>#',

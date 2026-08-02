@@ -1,4 +1,5 @@
 import type { CategoryId } from './categories';
+import { businessTools, healthTools } from './tools-professional';
 
 export interface FaqItem {
   q: string;
@@ -1560,6 +1561,8 @@ export const tools: Tool[] = [
       },
     ],
   },
+  ...healthTools,
+  ...businessTools,
 ];
 
 export const toolMap = new Map(tools.map((t) => [t.slug, t]));

@@ -16,7 +16,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
             <button
               onClick={() => setOpen(isOpen ? null : i)}
               aria-expanded={isOpen}
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover-surface"
             >
               <span className="text-[15px] font-semibold">{item.q}</span>
               <ChevronDown

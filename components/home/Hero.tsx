@@ -83,7 +83,7 @@ export function Hero() {
                     <Link
                       key={tool.slug}
                       href={`/tools/${tool.slug}`}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/10"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover-surface"
                     >
                       <span
                         className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br ${cat.gradient} text-white`}

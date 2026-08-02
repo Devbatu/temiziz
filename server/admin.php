@@ -35,6 +35,7 @@ require $mtLibDir . '/charts.php';
 require $mtLibDir . '/admin-dashboard.php';
 require $mtLibDir . '/audit.php';
 require $mtLibDir . '/admin-audit.php';
+require $mtLibDir . '/admin-inbox.php';
 
 /* ─────────────────────────── Oturum ─────────────────────────── */
 
@@ -105,7 +106,27 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !mt_logged_in()) {
         $error = 'Oturum dogrulamasi basarisiz. Sayfayi yenileyip tekrar deneyin.';
     } else {
         usleep(random_int(150000, 350000));
-        $ok = password_verify((string) ($_POST['sifre'] ?? ''), $config['admin_hash']);
+
+        /**
+         * Kullanici adi + parola. Yapilandirmada 'admin_user' tanimli degilse
+         * eski kurulumlar bozulmasin diye 'admin' varsayilir.
+         *
+         * Kullanici adi hash'lenmez ama karsilastirma hash_equals ile yapilir:
+         * duz === karsilastirmasi karakter karakter kisa devre yaptigi icin
+         * olculebilir zaman farki birakir ve kullanici adi tahmin edilebilir.
+         */
+        $beklenenKullanici = (string) ($config['admin_user'] ?? 'admin');
+        $girilenKullanici  = (string) ($_POST['kullanici'] ?? '');
+
+        $kullaniciOk = hash_equals(
+            hash('sha256', $beklenenKullanici),
+            hash('sha256', $girilenKullanici)
+        );
+        $parolaOk = password_verify((string) ($_POST['sifre'] ?? ''), $config['admin_hash']);
+
+        // Iki kontrol de her zaman calisir; hangisinin yanlis oldugu
+        // sizdirilmaz ve zamanlama farki olusmaz.
+        $ok = $kullaniciOk && $parolaOk;
         $db->prepare('INSERT INTO mt_login_attempts (ip_hash, attempted_at, success) VALUES (?, UTC_TIMESTAMP(), ?)')
            ->execute([$ipHash, $ok ? 1 : 0]);
 
@@ -114,12 +135,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !mt_logged_in()) {
             $_SESSION['admin'] = true;
             $_SESSION['ua']    = $_SERVER['HTTP_USER_AGENT'] ?? '';
             $_SESSION['csrf']  = bin2hex(random_bytes(32));
-            mt_audit('giris_basarili');
+            $_SESSION['kullanici'] = $beklenenKullanici;
+            mt_audit('giris_basarili', 'kullanici: ' . $beklenenKullanici);
             header('Location: admin.php');
             exit;
         }
-        mt_audit('giris_basarisiz');
-        $error = 'Parola hatali.';
+        // Hangi alanin yanlis oldugunu soylemiyoruz: kullanici adi
+        // dogrulamasi saldirgana bilgi verir.
+        mt_audit('giris_basarisiz', 'denenen kullanici: ' . mb_substr($girilenKullanici, 0, 40));
+        $error = 'Kullanici adi veya parola hatali.';
     }
 }
 
@@ -134,7 +158,7 @@ if (!mt_logged_in()) {
       body{margin:0;background:#0b0f1c;color:#e9edf7;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
       form{max-width:340px;margin:14vh auto;background:#141a2e;border:1px solid #232b45;border-radius:16px;padding:26px}
       h1{font-size:20px;margin:0 0 16px}
-      input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid #232b45;background:#0e1425;color:#e9edf7;font-size:15px;box-sizing:border-box}
+      input{width:100%;padding:11px 13px;margin-bottom:9px;border-radius:10px;border:1px solid #232b45;background:#0e1425;color:#e9edf7;font-size:15px;box-sizing:border-box}
       button{width:100%;margin-top:10px;padding:11px;border:0;border-radius:10px;background:#5b8cff;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
       .err{background:#3b1220;color:#ffb4c4;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:14px}
     </style></head><body>
@@ -142,7 +166,9 @@ if (!mt_logged_in()) {
       <h1>Yonetim Paneli</h1>
       <?php if ($error !== ''): ?><div class="err"><?= h($error) ?></div><?php endif; ?>
       <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
-      <input type="password" name="sifre" placeholder="Parola" required autofocus>
+      <input type="text" name="kullanici" placeholder="Kullanici adi" required autofocus
+             autocapitalize="off" autocorrect="off" spellcheck="false">
+      <input type="password" name="sifre" placeholder="Parola" required>
       <button type="submit">Giris</button>
     </form></body></html><?php
     exit;
@@ -170,6 +196,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && mt_csrf_ok()) {
     if ($blogSonuc !== null) {
         [$notice, $noticeType] = $blogSonuc;
         $section = 'blog';
+    }
+
+    // Mesaj ve yorum islemleri; hangi sekmeye donulecegini eylem adi belirler.
+    $inboxSonuc = mt_inbox_post($eylem, $_POST);
+    if ($inboxSonuc !== null) {
+        [$notice, $noticeType] = $inboxSonuc;
+        $section = str_starts_with($eylem, 'mesaj_') ? 'mesajlar' : 'yorumlar';
     }
 
     if ($eylem === 'parola') {
@@ -277,10 +310,23 @@ if ($section === 'kontrol' && ($_GET['calistir'] ?? '') === '1') {
 }
 
 
+/**
+ * Bekleyen is sayilari sekme adinda gosterilir; panele girer girmez
+ * ilgilenilmesi gereken bir sey olup olmadigi gorulur.
+ */
+$bekleyenMesaj = (int) mt_db()->query(
+    'SELECT COUNT(*) FROM mt_messages WHERE durum = "yeni"'
+)->fetchColumn();
+$bekleyenYorum = (int) mt_db()->query(
+    'SELECT COUNT(*) FROM mt_comments WHERE durum = "bekliyor"'
+)->fetchColumn();
+
 $sekmeler = [
     'ozet'    => 'Ozet',
     'davranis' => 'Davranis',
     'kayitlar' => 'Kayitlar',
+    'mesajlar' => 'Mesajlar' . ($bekleyenMesaj > 0 ? " ({$bekleyenMesaj})" : ''),
+    'yorumlar' => 'Yorumlar' . ($bekleyenYorum > 0 ? " ({$bekleyenYorum})" : ''),
     'blog'    => 'Blog',
     'olaylar' => 'Canli olaylar',
     'kontrol' => 'Site kontrolu',
@@ -440,6 +486,14 @@ $sekmeler = [
   </div>
 
   <?php mt_audit_render($days); ?>
+
+<?php elseif ($section === 'mesajlar'): ?>
+
+  <?php mt_mesajlar_render($_SESSION['csrf']); ?>
+
+<?php elseif ($section === 'yorumlar'): ?>
+
+  <?php mt_yorumlar_render($_SESSION['csrf']); ?>
 
 <?php elseif ($section === 'blog'): ?>
 

@@ -26,7 +26,7 @@ const sections = [
   },
   {
     title: 'Haklarınız',
-    body: 'Kimliğinizi belirleyecek veri tutmadığımız için silme talebi genellikle gerekmez. Yine de sorularınız için destek@multitools.app adresinden bize ulaşabilirsiniz.',
+    body: 'Kimliğinizi belirleyecek veri tutmadığımız için silme talebi genellikle gerekmez. Yine de sorularınız için iletişim sayfamızdaki formu kullanabilirsiniz.',
   },
 ];
 

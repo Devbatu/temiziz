@@ -20,6 +20,11 @@ return [
     // --- Site ---------------------------------------------------------------
     'site_url' => 'https://celaning.com',
 
+    // --- Yonetim paneli girisi ---------------------------------------------
+    // Kullanici adi. Tahmin edilmesi zor bir sey secin: 'admin' yaygin oldugu
+    // icin otomatik deneme araclarinin ilk denedigi degerdir.
+    'admin_user' => 'admin',
+
     // --- Yonetim paneli parolasi -------------------------------------------
     // Duz parola YAZMAYIN. Hash uretmek icin sunucuda su komutu calistirin:
     //   php -r "echo password_hash('SECTIGINIZ_PAROLA', PASSWORD_DEFAULT), PHP_EOL;"
