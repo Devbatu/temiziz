@@ -698,12 +698,73 @@ function mt_write_index(): bool
         . '</div>'
         . mt_liste_betigi();
 
-    $head = preg_replace(
-        '#<link rel="canonical" href="[^"]*"\s*/?>#',
-        '<link rel="canonical" href="' . rtrim(mt_config()['site_url'], '/') . '/blog/"/>',
-        $shell['before'],
-        1
-    ) ?? $shell['before'];
+    /*
+     * Kabuk ana sayfadan kopyalandigi icin baslik, aciklama ve og etiketleri
+     * ANA SAYFANIN degerlerini tasir. Duzeltilmezse /blog/ ile / ayni baslik
+     * ve aciklamayla gorunur; Google bunu yinelenen icerik sinyali sayar ve
+     * paylasimlarda blog sayfasi ana sayfa gibi gorunur.
+     */
+    $kok      = rtrim(mt_config()['site_url'], '/');
+    $kanonik  = $kok . '/blog/';
+    $sayfaBas = 'Blog — Araç rehberleri ve hesaplama kılavuzları | MultiTools';
+    $sayfaAck = 'PDF, görsel, SEO, sağlık ve meslek araçlarından en iyi verimi almanız için '
+        . 'adım adım rehberler, formüller ve örnek hesaplar.';
+
+    $head = $shell['before'];
+    $head = preg_replace('#<title>.*?</title>#s',
+        '<title>' . htmlspecialchars($sayfaBas, ENT_QUOTES, 'UTF-8') . '</title>', $head, 1) ?? $head;
+    $head = preg_replace('#<meta name="description" content="[^"]*"\s*/?>#',
+        '<meta name="description" content="' . htmlspecialchars($sayfaAck, ENT_QUOTES, 'UTF-8') . '"/>',
+        $head, 1) ?? $head;
+    $head = preg_replace('#<link rel="canonical" href="[^"]*"\s*/?>#',
+        '<link rel="canonical" href="' . $kanonik . '"/>', $head, 1) ?? $head;
+
+    foreach ([
+        ['property', 'og:title', $sayfaBas],
+        ['property', 'og:description', $sayfaAck],
+        ['property', 'og:url', $kanonik],
+        ['property', 'og:type', 'website'],
+        ['property', 'og:image', $kok . '/og-cover.png'],
+        ['name', 'twitter:title', $sayfaBas],
+        ['name', 'twitter:description', $sayfaAck],
+        ['name', 'twitter:image', $kok . '/og-cover.png'],
+        ['name', 'twitter:card', 'summary_large_image'],
+    ] as [$tur, $ad, $deger]) {
+        $etiket = '<meta ' . $tur . '="' . $ad . '" content="'
+            . htmlspecialchars($deger, ENT_QUOTES, 'UTF-8') . '"/>';
+        $desen  = '#<meta ' . $tur . '="' . preg_quote($ad, '#') . '" content="[^"]*"\s*/?>#';
+        $head = preg_match($desen, $head)
+            ? (preg_replace($desen, $etiket, $head, 1) ?? $head)
+            : str_replace('</head>', $etiket . '</head>', $head);
+    }
+
+    // Blog listesi icin CollectionPage + BreadcrumbList semasi.
+    $sema = [
+        '@context' => 'https://schema.org',
+        '@graph'   => [
+            [
+                '@type'       => 'CollectionPage',
+                'name'        => 'MultiTools Blog',
+                'description' => $sayfaAck,
+                'url'         => $kanonik,
+            ],
+            [
+                '@type'           => 'BreadcrumbList',
+                'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Ana sayfa', 'item' => $kok . '/'],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blog', 'item' => $kanonik],
+                ],
+            ],
+        ],
+    ];
+    $head = str_replace(
+        '</head>',
+        '<script type="application/ld+json">'
+        . str_replace(['<', '>', '&'], ['<', '>', '&'],
+            json_encode($sema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))
+        . '</script></head>',
+        $head
+    );
 
     return file_put_contents(mt_public_dir() . '/blog/index.html', $head . $body . $shell['after']) !== false;
 }

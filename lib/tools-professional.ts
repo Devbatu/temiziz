@@ -48,7 +48,7 @@ export const healthTools: Tool[] = [
   },
   {
     slug: 'egfr-hesaplama',
-    name: 'eGFR Hesaplama (CKD-EPI 2021)',
+    name: 'eGFR Hesaplama (CKD-EPI)',
     category: 'health',
     description:
       'Serum kreatinin, yaş ve cinsiyetten tahmini glomerüler filtrasyon hızını CKD-EPI 2021 formülüyle hesaplayın ve KBH evresini görün.',
@@ -150,7 +150,7 @@ export const healthTools: Tool[] = [
   },
   {
     slug: 'wells-dvt-skoru',
-    name: 'Wells Skoru — Derin Ven Trombozu',
+    name: 'Wells Skoru — DVT',
     category: 'health',
     description:
       'Derin ven trombozu klinik olasılığını Wells DVT kriterleriyle hesaplayın ve ultrasonografi kararına yön verin.',
@@ -354,7 +354,7 @@ export const healthTools: Tool[] = [
   },
   {
     slug: 'timi-skoru',
-    name: 'TIMI Risk Skoru (UA/NSTEMI)',
+    name: 'TIMI Risk Skoru',
     category: 'health',
     description:
       'Kararsız angina ve NSTEMI’de TIMI risk skorunu hesaplayın; 14 günlük olay riskini ve invaziv strateji eşiğini görün.',
@@ -633,7 +633,7 @@ export const businessTools: Tool[] = [
   },
   {
     slug: 'gecikme-faizi-hesaplama',
-    name: 'Gecikme Faizi ve Vade Farkı Hesaplama',
+    name: 'Gecikme Faizi Hesaplama',
     category: 'business',
     description:
       'Anapara, yıllık faiz oranı ve gecikme gününden işleyen faizi, günlük faizi ve toplam borcu hesaplayın.',

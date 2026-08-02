@@ -12,7 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Blog YAZILARI burada yok: onlar veritabaninda yasiyor ve PHP tarafindan
   // uretilen sitemap-blog.xml icinde listeleniyor (robots.txt ikisini de bildirir).
-  const staticPages = ['/', '/tools', '/blog', '/pricing', '/api', '/about', '/contact', '/privacy', '/terms'].map(
+
+  const staticPages = ['/', '/tools', '/blog', '/pricing', '/about', '/contact', '/privacy', '/terms'].map(
     (path) => ({
       url: absoluteUrl(path),
       lastModified: now,

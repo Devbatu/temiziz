@@ -8,8 +8,14 @@ export function toolMetaDescription(tool: Tool) {
   return base.length > 158 ? `${base.slice(0, 155).trimEnd()}…` : base;
 }
 
+
 export function toolTitle(tool: Tool) {
-  return `${tool.name} — Ücretsiz Online Araç`;
+  const BUTCE = 47;
+  const uzun = `${tool.name} — Ücretsiz Online Araç`;
+  if (uzun.length <= BUTCE) return uzun;
+  const kisa = `${tool.name} — Online Araç`;
+  if (kisa.length <= BUTCE) return kisa;
+  return tool.name;
 }
 
 /** Tool-specific FAQ, falling back to sensible platform-wide answers. */
