@@ -18,6 +18,22 @@ export function toolTitle(tool: Tool) {
   return tool.name;
 }
 
+/**
+ * Araca özgü kullanım adımları.
+ *
+ * Geri dönüş metni bilerek aracın adını ve ne ürettiğini içeriyor: aynı üç
+ * cümlenin her sayfada birebir tekrarlanması hem okuyucuya bir şey anlatmıyor
+ * hem de sayfaları birbirinin kopyası haline getiriyordu.
+ */
+export function toolSteps(tool: Tool): string[] {
+  if (tool.steps?.length) return tool.steps;
+  return [
+    `${tool.name} alanına verinizi girin veya dosyanızı yükleyin.`,
+    'Sunulan seçenekleri ihtiyacınıza göre ayarlayın.',
+    'Sonucu kontrol edip kopyalayın ya da indirin.',
+  ];
+}
+
 /** Tool-specific FAQ, falling back to sensible platform-wide answers. */
 export function toolFaq(tool: Tool): FaqItem[] {
   const cat = categoryMap.get(tool.category)!;
@@ -39,7 +55,12 @@ export function toolFaq(tool: Tool): FaqItem[] {
       a: `${cat.name} kategorisinde bu araca ek olarak birçok araç bulunur. Sayfanın alt bölümündeki “Benzer araçlar” listesinden ulaşabilirsiniz.`,
     },
   ];
-  return [...(tool.faq ?? []), ...generic].slice(0, 5);
+  // Genel sorular yalnızca aracın kendi SSS'i üçe ulaşmıyorsa tamamlayıcı
+  // olarak eklenir. Her sayfaya birebir aynı cevapları iliştirmek bölümü
+  // uzatıyor ama sayfayı zenginleştirmiyor; sayfalar birbirinin kopyası oluyor.
+  const own = tool.faq ?? [];
+  if (own.length >= 3) return own.slice(0, 6);
+  return [...own, ...generic].slice(0, 3);
 }
 
 export function toolJsonLd(tool: Tool) {

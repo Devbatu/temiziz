@@ -309,8 +309,17 @@ export function markdownToHtml(md: string) {
       )
       .replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
-        (_m, text: string, href: string) =>
-          `<a href="${safeUrl(href)}" rel="nofollow noopener" target="_blank">${text}</a>`,
+        (_m, text: string, href: string) => {
+          const url = safeUrl(href);
+          // Site içi bağlantılar aynı sekmede ve takip edilebilir kalmalı:
+          // nofollow, kendi sayfalarımız arasındaki bağ sinyalini boşa
+          // harcıyor; target="_blank" ise okuyucuyu gereksizce yeni sekmeye
+          // atıyordu. Dış bağlantılarda ikisi de yerinde duruyor.
+          const ici = url.startsWith('/') || url.startsWith('#');
+          return ici
+            ? `<a href="${url}">${text}</a>`
+            : `<a href="${url}" rel="nofollow noopener" target="_blank">${text}</a>`;
+        },
       );
   }
 }

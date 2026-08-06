@@ -3,16 +3,19 @@
  *
  * NE KAYDEDİLİR
  *  · Fare yolu (250 ms örnekleme, yalnızca hareket varsa)
- *  · Tıklamalar — konum + tıklanan düğme/bağlantı etiketi
- *  · Hover — düğme/bağlantı üzerinde 400 ms'den uzun bekleme
+ *  · Tıklamalar — konum + tıklanan öğenin etiketi
+ *  · Hover — bir öğe üzerinde 400 ms'den uzun bekleme
  *  · Kaydırma konumu
  *
  * NE KAYDEDİLMEZ (bilinçli sınır)
- *  · Girdi alanlarına yazılan hiçbir şey — `value` hiçbir zaman okunmaz
- *  · Rastgele elemanların metni. Etiket YALNIZCA <button> ve <a> için alınır;
- *    bunlar sabit arayüz metinleridir. Sonuç panellerindeki metin (çözülmüş
- *    JWT, üretilen parola, biçimlendirilmiş JSON) okunmaz.
+ *  · Girdi alanlarına yazılan hiçbir şey — `value` hiçbir dalda okunmaz
+ *  · Sonuç panellerindeki çıktı (çözülmüş JWT, üretilen parola, biçimlendirilmiş
+ *    JSON). Metin yalnızca HEDEF listesindeki arayüz öğelerinden alınır.
  *  · Dosya adları, pano içeriği, form değerleri
+ *
+ * Form alanlarında yalnızca ALANIN ADI kaydedilir ("E-posta", "Kalite"),
+ * içine yazılan değer değil. Böylece ziyaretçinin hangi alanla uğraştığı
+ * görülür ama ne yazdığı görülmez.
  *
  * Boyut sınırı: bir sayfa görüntülemesi için en faz MAX_EVENTS olay. Sınır
  * dolduğunda kayıt sessizce durur; analitik hiçbir zaman sayfayı yavaşlatmaz.
@@ -36,13 +39,44 @@ export interface Replay {
   frames: Frame[];
 }
 
-/** Yalnızca düğme ve bağlantılardan sabit arayüz etiketi alır. */
+/** Etiket alınabilecek öğeler. Metin yalnızca bunlardan okunur. */
+const HEDEF = 'button, a, input, select, textarea, label, summary, [role="button"]';
+
+/**
+ * Bir öğenin SABİT arayüz etiketini döndürür.
+ *
+ * Düğme ve bağlantılarda görünen metin kullanılır — bunlar sabit arayüz
+ * yazılarıdır. Form alanlarında ise DEĞER ASLA OKUNMAZ; yalnızca alanı
+ * tanımlayan etiket, yer tutucu, aria-label veya `name` özniteliği alınır.
+ * Böylece "hangi alana tıkladı" görünür ama "ne yazdı" görünmez.
+ */
 function label(el: Element | null): string | null {
-  const target = el?.closest('button, a');
+  const target = el?.closest(HEDEF);
   if (!target) return null;
 
-  const aria = target.getAttribute('aria-label');
-  const text = aria ?? target.textContent ?? '';
+  let text = target.getAttribute('aria-label') ?? '';
+
+  if (text === '' && (target instanceof HTMLInputElement
+    || target instanceof HTMLSelectElement
+    || target instanceof HTMLTextAreaElement)) {
+    // Sırayla: bağlı <label> metni, yer tutucu, name özniteliği.
+    // `value` hiçbir dalda okunmaz.
+    const id = target.getAttribute('id');
+    const bagli = id ? document.querySelector(`label[for="${CSS.escape(id)}"]`) : null;
+    const saran = target.closest('label');
+    text =
+      bagli?.textContent
+      ?? saran?.textContent
+      ?? target.getAttribute('placeholder')
+      ?? target.getAttribute('name')
+      ?? '';
+
+    const tur = target.getAttribute('type');
+    if (tur === 'file') text = `${text || 'Dosya'} (dosya seçimi)`.trim();
+  }
+
+  if (text === '') text = target.textContent ?? '';
+
   const clean = text.replace(/\s+/g, ' ').trim();
   return clean === '' ? null : clean.slice(0, 40);
 }
@@ -93,7 +127,7 @@ export function startRecording(): { stop: () => Replay | null } {
   let hoverAt = 0;
 
   function onOver(e: MouseEvent) {
-    const el = (e.target as Element)?.closest('button, a');
+    const el = (e.target as Element)?.closest(HEDEF);
     if (el === hoverEl) return;
     flushHover();
     hoverEl = el;

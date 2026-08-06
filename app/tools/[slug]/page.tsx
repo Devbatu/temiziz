@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { Check, Clock, ShieldCheck, Zap } from 'lucide-react';
 import { getTool, relatedTools, tools } from '@/lib/tools';
 import { categoryMap } from '@/lib/categories';
-import { toolFaq, toolJsonLd, toolMetaDescription, toolTitle } from '@/lib/seo';
+import { toolFaq, toolJsonLd, toolMetaDescription, toolSteps, toolTitle } from '@/lib/seo';
 import { postsForTool } from '@/lib/blog';
 import { absoluteUrl, site } from '@/lib/site';
 import { ToolRuntime } from '@/components/tools/registry';
-import { Reviews } from '@/components/tools/Reviews';
 import { ShareButton } from '@/components/tools/shared';
 import { ToolCard } from '@/components/ui/ToolCard';
 import { Faq } from '@/components/ui/Faq';
@@ -156,11 +155,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
 
           <h3 className="mt-8 text-lg font-bold">Nasıl kullanılır?</h3>
           <ol className="mt-3 space-y-3">
-            {[
-              'Yukarıdaki alana verinizi girin veya dosyanızı yükleyin.',
-              'İhtiyacınıza göre ayarları düzenleyin.',
-              'Sonucu tek tıkla kopyalayın ya da indirin.',
-            ].map((step, i) => (
+            {toolSteps(tool).map((step, i) => (
               <li key={step} className="flex items-start gap-3">
                 <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500/12 text-xs font-bold text-brand-500">
                   {i + 1}
@@ -221,11 +216,6 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             </div>
           </section>
         )}
-
-        {/* ── reviews ── */}
-        <section className="mt-14">
-          <Reviews slug={tool.slug} />
-        </section>
       </div>
     </>
   );

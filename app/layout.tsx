@@ -106,11 +106,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           sayfa render'ini bloklamaz.
         */}
         {adsense.enabled && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense.client}`}
-            crossOrigin="anonymous"
-          />
+          <>
+            {/*
+              Yönetim panelindeki kayıt oynatıcı bu sayfayı bir iframe içinde
+              açar. Reklamlar orada da yüklenirse site sahibinin kendi
+              görüntülemeleri gösterim üretir; AdSense bunu GEÇERSİZ TRAFİK
+              sayar ve hesap kapatmaya kadar gidebilir.
+
+              Oynatıcı sayfayı `?mtreplay=1` ile açıyor. Bu kısa betik, asıl
+              AdSense betiğinden ÖNCE çalışır ve o bayrağı görürse
+              `adsbygoogle` kuyruğunu işlemeyen bir nesneyle değiştirir;
+              otomatik reklamlar da elle yerleştirilen birimler de sessizce
+              devre dışı kalır.
+            */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html:
+                  "(function(){try{if(new URLSearchParams(location.search).get('mtreplay')==='1'){"
+                  + 'window.adsbygoogle={loaded:true,push:function(){},requestNonPersonalizedAds:1};'
+                  + '}}catch(e){}})();',
+              }}
+            />
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense.client}`}
+              crossOrigin="anonymous"
+            />
+          </>
         )}
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />

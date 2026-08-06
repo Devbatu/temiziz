@@ -57,7 +57,10 @@ interface Payload {
 }
 
 export function track(type: EventType, data: Payload = {}) {
-  if (!ENDPOINT || typeof window === 'undefined') return;
+  // Kayıt oynatıcısının iframe'i içindeysek hiçbir olay gönderilmez; araç
+  // bileşenleri ve reklam birimleri de bu fonksiyonu çağırdığı için denetim
+  // burada da tekrarlanıyor.
+  if (!ENDPOINT || typeof window === 'undefined' || replayIcinde()) return;
 
   const body = JSON.stringify({
     type,
@@ -82,6 +85,27 @@ export function track(type: EventType, data: Payload = {}) {
   });
 }
 
+/**
+ * Yönetim panelindeki kayıt oynatıcı, sayfayı bir iframe içinde açar.
+ *
+ * Oynatıcının araçları gerçekten göstermesi için iframe'de JavaScript çalışması
+ * gerekir — araç bileşenleri yalnızca istemcide yükleniyor, betikler kapalıyken
+ * sayfa sonsuza kadar "Araç yükleniyor…" iskeletinde kalıyordu. Ancak betikler
+ * açılınca bu izleyici de iframe içinde çalışır ve her izleme yeni bir sahte
+ * ziyaret + yeni bir kayıt üretirdi.
+ *
+ * Oynatıcı sayfayı `?mtreplay=1` ile açar; bu bayrağı gören izleyici tamamen
+ * devre dışı kalır. Böylece araçlar çalışır ama hiçbir veri üretilmez.
+ */
+function replayIcinde(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return new URLSearchParams(window.location.search).get('mtreplay') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function Tracker() {
   const pathname = usePathname();
   const last = useRef('');
@@ -91,7 +115,7 @@ export function Tracker() {
   const recorder = useRef<{ stop: () => Replay | null } | null>(null);
 
   useEffect(() => {
-    if (!ENDPOINT || pathname === last.current) return;
+    if (!ENDPOINT || replayIcinde() || pathname === last.current) return;
 
     // Önceki sayfa için ayrılma olayını gönder (tek sayfa uygulaması gezinmesi).
     if (last.current !== '') flush();

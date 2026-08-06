@@ -14,7 +14,16 @@ import {
   ToolShell,
 } from './shared';
 
-/* ─────────────────────── shared /api/net client ─────────────────────── */
+/* ─────────────────────── ağ araçları istemcisi ─────────────────────── */
+
+/**
+ * Statik yayında Next.js sunucu rotaları bulunmaz; bu sorguları aynı sunucudaki
+ * PHP ucu karşılar. Geliştirme sunucusunda `/api/net` çalıştığı için orası
+ * kullanılır — böylece iki ortamda da tek kod yolu geçerli olur.
+ */
+const NET_ENDPOINT = process.env.NEXT_PUBLIC_ANALYTICS_URL
+  ? process.env.NEXT_PUBLIC_ANALYTICS_URL.replace(/collect\.php$/, 'net.php')
+  : '/api/net';
 
 function useNetAction<T>(action: string) {
   const [data, setData] = useState<T | null>(null);
@@ -26,7 +35,7 @@ function useNetAction<T>(action: string) {
     setError('');
     setData(null);
     try {
-      const res = await fetch('/api/net', {
+      const res = await fetch(NET_ENDPOINT, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ action, ...payload }),
@@ -550,10 +559,10 @@ export function CanonicalChecker() {
     setError('');
     setData(null);
     try {
-      const res = await fetch('/api/seo/canonical', {
+      const res = await fetch(NET_ENDPOINT, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ action: 'canonical', url }),
       });
       const json = await res.json();
       if (!res.ok) {

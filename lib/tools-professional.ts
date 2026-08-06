@@ -19,7 +19,8 @@ export const healthTools: Tool[] = [
     description:
       'Boy ve kilodan vücut kitle indeksini hesaplayın; WHO sınıflamasına göre yorumunu ve boyunuza uygun kilo aralığını görün.',
     icon: 'Scale',
-    keywords: ['bmi hesaplama', 'vücut kitle indeksi', 'bki hesapla', 'ideal kilo', 'body mass index'],
+    keywords: ['bmi hesaplama', 'vücut kitle indeksi', 'bki hesapla', 'ideal kilo',
+      'body mass index', 'kilo hesaplama', 'bmi'],
     popularity: 78,
     added: EKLENDI,
     badges: ['new'],

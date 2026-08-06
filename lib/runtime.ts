@@ -5,30 +5,15 @@
  */
 export const isStaticBuild = process.env.NEXT_PUBLIC_STATIC_MODE === '1';
 
-/** Bir Next.js sunucusu olmadan çalışamayan araçlar. */
+/**
+ * Bir Next.js sunucusu olmadan calisamayan araclar.
+ *
+ * Ag ve SEO araclari artik ayni sunucudaki PHP ucuyla (mt/net.php) calisiyor,
+ * bu yuzden listeden cikarildi. Geriye yalnizca ekran goruntusu araci kaliyor:
+ * o bir headless tarayici gerektiriyor ve paylasimli hostingde calistirilamaz.
+ */
 export const serverTools = new Set([
-  // /api/net
-  'whois-lookup',
-  'ip-lookup',
-  'ssl-checker',
-  'ping-test',
-  'port-checker',
-  'website-status-checker',
-  // /api/seo/canonical
-  'canonical-checker',
-  // /api/screenshot
   'website-screenshot',
-  // /api/ai
-  'ai-resume-builder',
-  'ai-cover-letter',
-  'ai-email-generator',
-  'ai-blog-writer',
-  'ai-caption-generator',
-  'ai-product-description',
-  'ai-prompt-generator',
-  'ai-rewrite-tool',
-  'ai-hashtag-generator',
-  'ai-title-generator',
 ]);
 
 export function needsServer(slug: string) {

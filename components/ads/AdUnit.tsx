@@ -40,7 +40,15 @@ export function AdUnit({
   const pushed = useRef(false);
   const [visible, setVisible] = useState(false);
   const slotId = adSlots[slot];
-  const live = adsense.enabled && Boolean(slotId);
+  /*
+   * Kayit oynaticinin iframe'i icinde reklam GOSTERILMEZ. Aksi halde site
+   * sahibinin kendi izlemeleri gosterim uretir ve AdSense bunu gecersiz
+   * trafik sayar. Bayrak: oynatici sayfayi ?mtreplay=1 ile aciyor.
+   */
+  const replayIcinde =
+    typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('mtreplay') === '1';
+  const live = adsense.enabled && Boolean(slotId) && !replayIcinde;
   const size = SIZES[format];
 
   // Only initialise the unit once it is near the viewport — keeps the initial

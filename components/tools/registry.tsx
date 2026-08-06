@@ -72,7 +72,6 @@ export const toolComponents: Record<string, ComponentType> = {
   'random-number-generator': lazy(() => util().then((m) => m.RandomNumberGenerator)),
   'random-name-generator': lazy(() => util().then((m) => m.RandomNameGenerator)),
   'age-calculator': lazy(() => util().then((m) => m.AgeCalculator)),
-  'bmi-calculator': lazy(() => util().then((m) => m.BmiCalculator)),
   'unit-converter': lazy(() => util().then((m) => m.UnitConverter)),
   'timezone-converter': lazy(() => util().then((m) => m.TimezoneConverter)),
   'color-picker': lazy(() => util().then((m) => m.ColorPicker)),
@@ -114,21 +113,10 @@ export const toolComponents: Record<string, ComponentType> = {
   'ping-test': lazy(() => web().then((m) => m.PingTest)),
   'port-checker': lazy(() => web().then((m) => m.PortChecker)),
   'website-status-checker': lazy(() => web().then((m) => m.WebsiteStatusChecker)),
-  'website-screenshot': lazy(() => web().then((m) => m.WebsiteScreenshot)),
   'canonical-checker': lazy(() => web().then((m) => m.CanonicalChecker)),
   'currency-converter': lazy(() => web().then((m) => m.CurrencyConverter)),
 
   // ai
-  'ai-resume-builder': lazy(() => ai().then((m) => m.AiResumeBuilder)),
-  'ai-cover-letter': lazy(() => ai().then((m) => m.AiCoverLetter)),
-  'ai-email-generator': lazy(() => ai().then((m) => m.AiEmailGenerator)),
-  'ai-blog-writer': lazy(() => ai().then((m) => m.AiBlogWriter)),
-  'ai-caption-generator': lazy(() => ai().then((m) => m.AiCaptionGenerator)),
-  'ai-product-description': lazy(() => ai().then((m) => m.AiProductDescription)),
-  'ai-prompt-generator': lazy(() => ai().then((m) => m.AiPromptGenerator)),
-  'ai-rewrite-tool': lazy(() => ai().then((m) => m.AiRewriteTool)),
-  'ai-hashtag-generator': lazy(() => ai().then((m) => m.AiHashtagGenerator)),
-  'ai-title-generator': lazy(() => ai().then((m) => m.AiTitleGenerator)),
 
   // saglik hesaplayicilari
   'bmi-hesaplama': lazy(() => health().then((m) => m.Bmi)),

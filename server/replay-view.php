@@ -141,9 +141,30 @@ $sure   = (int) $k['duration_ms'];
   </div>
 
   <div class="stage" id="stage">
-    <iframe id="frame" title="Kayit onizleme" sandbox="allow-same-origin"
+    <?php
+    /*
+     * `allow-scripts` NEDEN ACIK: arac bilesenleri yalnizca istemcide yukleniyor.
+     * Betikler kapaliyken sayfa sonsuza kadar "Arac yukleniyor..." iskeletinde
+     * kaliyor ve kaydin ustunde ziyaretcinin gordugu ekran yerine bos bir
+     * cerceve gorunuyordu.
+     *
+     * SAHTE KAYIT SORUNU: betikler acilinca sitenin kendi izleyicisi de iframe
+     * icinde calisir ve her izleme yeni bir ziyaret + yeni bir kayit uretirdi.
+     * Bu yuzden sayfa `?mtreplay=1` ile aciliyor; izleyici bu bayragi gorunce
+     * tamamen devre disi kaliyor (bkz. components/analytics/Tracker.tsx).
+     *
+     * `allow-same-origin` de gerekli: Next.js hidrasyonu ve tema betigi
+     * localStorage'a eristigi icin opak kokende hata veriyor. Cerceve zaten
+     * kendi sitemizin sayfasini gosteriyor ve uzerinde tiklamayi engelleyen
+     * bir kalkan var.
+     */
+    $onizleme = $siteUrl . (string) $k['path'];
+    $onizleme .= (str_contains($onizleme, '?') ? '&' : '?') . 'mtreplay=1';
+    ?>
+    <iframe id="frame" title="Kayit onizleme"
+            sandbox="allow-scripts allow-same-origin"
             tabindex="-1" aria-hidden="true"
-            src="<?= h($siteUrl . (string) $k['path']) ?>"></iframe>
+            src="<?= h($onizleme) ?>"></iframe>
     <div id="kalkan"></div>
     <div id="cursor"></div>
     <div id="ripple"></div>

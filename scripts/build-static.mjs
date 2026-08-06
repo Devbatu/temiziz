@@ -96,6 +96,27 @@ try {
     `# MultiTools — statik sürüm
 ErrorDocument 404 /404.html
 
+# Birlestirilen arac: bmi-calculator ile bmi-hesaplama ayni islevi goruyordu.
+# Iki URL ayni sorgu icin yarisinca arama motoru sinyalleri boler; eski adres
+# kalici olarak yenisine yonlendiriliyor.
+Redirect 301 /tools/bmi-calculator/ /tools/bmi-hesaplama/
+
+# Kaldirilan araclar: calismak icin bir uygulama sunucusu veya ucretli
+# bir API gerektiriyorlardi. Calismayan sayfa birakmak yerine kategoriye
+# yonlendiriliyorlar.
+Redirect 301 /tools/ai-resume-builder/ /category/ai/
+Redirect 301 /tools/ai-cover-letter/ /category/ai/
+Redirect 301 /tools/ai-email-generator/ /category/ai/
+Redirect 301 /tools/ai-blog-writer/ /category/ai/
+Redirect 301 /tools/ai-caption-generator/ /category/ai/
+Redirect 301 /tools/ai-product-description/ /category/ai/
+Redirect 301 /tools/ai-prompt-generator/ /category/ai/
+Redirect 301 /tools/ai-rewrite-tool/ /category/ai/
+Redirect 301 /tools/ai-hashtag-generator/ /category/ai/
+Redirect 301 /tools/ai-title-generator/ /category/ai/
+Redirect 301 /tools/website-screenshot/ /category/website/
+Redirect 301 /tools/bmi-calculator /tools/bmi-hesaplama/
+
 # Tek kanonik adres: https + www'suz.
 # Ayni icerigin iki adreste yayinlanmasi (www / www'suz) arama motorlarinda
 # yinelenen icerik sayilir ve siralama gucunu ikiye boler.

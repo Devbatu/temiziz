@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ToolExplorer } from '@/components/tools-page/ToolExplorer';
+import { ToolDirectory } from '@/components/tools-page/ToolDirectory';
 import { toolCount } from '@/lib/tools';
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function ToolsPage() {
         </p>
       </header>
       <ToolExplorer />
+      <ToolDirectory />
     </div>
   );
 }

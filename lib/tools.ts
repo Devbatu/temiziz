@@ -1,5 +1,6 @@
 import type { CategoryId } from './categories';
 import { businessTools, healthTools } from './tools-professional';
+import { toolContent } from './tool-content';
 
 export interface FaqItem {
   q: string;
@@ -27,6 +28,8 @@ export interface Tool {
   /** Concrete "ne işe yarar" bullets. */
   useCases?: string[];
   faq?: FaqItem[];
+  /** Araca özgü kullanım adımları. Tanımsızsa sayfa genel bir sıra gösterir. */
+  steps?: string[];
   /** True when the interactive widget is wired up. */
   live?: boolean;
 }
@@ -36,7 +39,7 @@ export interface Tool {
  * Adding a tool = one entry here + one component in `components/tools/registry.tsx`.
  * Routes, sitemap, search, categories and SEO metadata all derive from this list.
  */
-export const tools: Tool[] = [
+const registry: Tool[] = [
   // ─────────────────────────────── PDF ───────────────────────────────
   {
     slug: 'merge-pdf',
@@ -483,306 +486,6 @@ export const tools: Tool[] = [
   },
 
   // ──────────────────────────────── AI ───────────────────────────────
-  {
-    slug: 'ai-resume-builder',
-    name: 'AI Özgeçmiş Oluşturucu',
-    category: 'ai',
-    description:
-      'Bilgilerinizi girin, işe alım uzmanlarının aradığı formatta CV metni alın.',
-    icon: 'FileUser',
-    keywords: ['cv oluştur', 'resume builder', 'özgeçmiş hazırlama', 'cv şablonu', 'ats uyumlu cv'],
-    popularity: 92,
-    added: '2025-03-01',
-    badges: ['new', 'trending'],
-    live: true,
-    about:
-      'AI Özgeçmiş Oluşturucu, girdiğiniz deneyim ve yetkinlikleri aday takip sistemlerinin (ATS) okuyabileceği, ölçülebilir başarılara odaklanan bir CV metnine dönüştürür. Uydurma deneyim veya sertifika eklemez — yalnızca verdiğiniz bilgileri düzenler ve güçlendirir.',
-    useCases: [
-      'Dağınık notlardan derli toplu bir özgeçmiş metni çıkarmak',
-      'Aynı deneyimi farklı pozisyonlara göre yeniden konumlandırmak',
-      'İngilizce başvurular için CV metnini hazırlamak',
-    ],
-    faq: [
-      {
-        q: 'Bilgilerim saklanıyor mu?',
-        a: 'Hayır. Girdiğiniz bilgiler yalnızca o istek için işlenir; sunucularımızda saklanmaz ve model eğitiminde kullanılmaz.',
-      },
-      {
-        q: 'ATS uyumlu ne demek?',
-        a: 'Büyük şirketler başvuruları önce otomatik sistemlerle tarar. Araç, bu sistemlerin okuyamadığı karmaşık tablo ve grafiklerden kaçınıp düz metin başlıkları kullanır.',
-      },
-      {
-        q: 'Çıktıyı olduğu gibi kullanabilir miyim?',
-        a: 'Yayınlamadan önce mutlaka gözden geçirin. Yapay zekâ metni düzenler ama tarih, unvan ve rakamların doğruluğundan siz sorumlusunuz.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-cover-letter',
-    name: 'AI Ön Yazı Oluşturucu',
-    category: 'ai',
-    description:
-      'Başvurduğunuz pozisyona özel, ikna edici ön yazılar üretin.',
-    icon: 'Mail',
-    keywords: ['cover letter', 'ön yazı', 'başvuru mektubu', 'motivasyon mektubu'],
-    popularity: 80,
-    added: '2025-03-01',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI Ön Yazı Oluşturucu, deneyiminizi başvurduğunuz pozisyonun ihtiyaçlarına bağlayan, en fazla dört paragraflık bir ön yazı üretir. Klişe kalıplardan kaçınır ve seçtiğiniz tonu tutarlı biçimde uygular.',
-    useCases: [
-      'Her başvuru için sıfırdan yazmak yerine pozisyona özel taslak almak',
-      'Kariyer değişikliğinde geçmiş deneyimi yeni role bağlamak',
-      'Yabancı dilde başvuru mektubu hazırlamak',
-    ],
-    faq: [
-      {
-        q: 'Ne kadar uzun oluyor?',
-        a: 'En fazla dört paragraf. İşe alım uzmanları ön yazıya ortalama 30 saniye ayırdığı için kısa ve odaklı tutulur.',
-      },
-      {
-        q: 'Şirket hakkında bilgi ekliyor mu?',
-        a: 'Yalnızca sizin verdiğiniz bilgileri kullanır; şirket hakkında doğrulanmamış iddialar üretmez.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-email-generator',
-    name: 'AI E-posta Üretici',
-    category: 'ai',
-    description: 'Konu ve tona göre profesyonel e-posta taslakları oluşturun.',
-    icon: 'Send',
-    keywords: ['email generator', 'e-posta yazma', 'mail taslağı', 'iş maili', 'profesyonel e-posta'],
-    popularity: 86,
-    added: '2025-03-02',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI E-posta Üretici, amacınızı ve eklemek istediğiniz detayları alıp konu satırıyla birlikte gönderilmeye hazır bir e-posta taslağı yazar. Zor konuları (gecikmiş ödeme, olumsuz yanıt, zam talebi) doğru tonda ifade etmenizi kolaylaştırır.',
-    useCases: [
-      'Gecikmiş faturayı nazik ama net bir dille hatırlatmak',
-      'Müşteri şikâyetine profesyonel yanıt hazırlamak',
-      'Toplantı talebi veya iş birliği teklifi yazmak',
-    ],
-    faq: [
-      {
-        q: 'Konu satırı da üretiliyor mu?',
-        a: 'Evet. Çıktı, açılma oranını artıracak kısa bir konu satırı ve gövde metninden oluşur.',
-      },
-      {
-        q: 'Türkçe dışında dil desteği var mı?',
-        a: 'Evet, formdan İngilizce seçebilirsiniz.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-blog-writer',
-    name: 'AI Blog Yazarı',
-    category: 'ai',
-    description: 'Anahtar kelimeden SEO uyumlu blog taslağı ve içerik üretin.',
-    icon: 'PenLine',
-    keywords: ['blog writer', 'içerik üretici', 'yazı yazdırma', 'seo içerik', 'blog yazısı'],
-    popularity: 93,
-    added: '2025-03-02',
-    badges: ['new', 'trending'],
-    live: true,
-    about:
-      'AI Blog Yazarı, konu ve anahtar kelimenizden H2/H3 başlıklarla bölümlenmiş, okunabilir bir blog yazısı üretir. Anahtar kelimeyi doğal bir yoğunlukta kullanır; anahtar kelime doldurmadan kaçınır. Uzunluğu ve tonu siz belirlersiniz.',
-    useCases: [
-      'İçerik takviminizdeki konular için ilk taslağı hızlıca çıkarmak',
-      'Yazarken tıkandığınız bölümler için yapı ve başlık önerisi almak',
-      'Ürün veya hizmetinizi anlatan bilgilendirici içerik hazırlamak',
-    ],
-    faq: [
-      {
-        q: 'Üretilen içerik özgün mü?',
-        a: 'Metin her seferinde yeniden üretilir, kopyalanmaz. Yine de yayınlamadan önce kendi bilgi ve örneklerinizi ekleyerek zenginleştirmenizi öneririz.',
-      },
-      {
-        q: 'İstatistik ve kaynak veriyor mu?',
-        a: 'Hayır. Araç bilinçli olarak rakam ve alıntı uydurmaz; sayısal iddiaları kendi kaynaklarınızla eklemelisiniz.',
-      },
-      {
-        q: 'Arama motorları AI içeriği cezalandırır mı?',
-        a: 'Google, üretim yöntemine değil içeriğin faydasına bakar. Taslağı düzenleyip özgün değer katarsanız sorun yaşamazsınız.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-caption-generator',
-    name: 'AI Açıklama Üretici',
-    category: 'ai',
-    description: 'Sosyal medya gönderileriniz için etkileyici açıklamalar yazın.',
-    icon: 'MessageSquareText',
-    keywords: ['caption generator', 'instagram açıklama', 'sosyal medya metni', 'gönderi yazısı'],
-    popularity: 84,
-    added: '2025-03-04',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI Açıklama Üretici, gönderi konunuz için seçtiğiniz platformun üslubuna uygun beş farklı açıklama alternatifi üretir. Böylece markanıza en uygun olanı seçip düzenleyebilirsiniz.',
-    useCases: [
-      'Aynı görsel için farklı üsluplarda alternatifler denemek',
-      'İçerik takviminizi hızlıca doldurmak',
-      'LinkedIn ve Instagram için aynı konuyu farklı tonlarda anlatmak',
-    ],
-    faq: [
-      {
-        q: 'Kaç alternatif üretiliyor?',
-        a: 'Her seferinde beş farklı açıklama. Beğenmezseniz tekrar üretebilirsiniz.',
-      },
-      {
-        q: 'Emoji kullanıyor mu?',
-        a: 'Ölçülü şekilde. Aşırı emoji kullanımından kaçınacak biçimde ayarlandı.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-product-description',
-    name: 'AI Ürün Açıklaması',
-    category: 'ai',
-    description: 'E-ticaret ürünleriniz için dönüşüm odaklı açıklamalar üretin.',
-    icon: 'ShoppingBag',
-    keywords: ['ürün açıklaması', 'product description', 'e-ticaret metni', 'ürün metni yazma'],
-    popularity: 81,
-    added: '2025-03-04',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI Ürün Açıklaması, teknik özellikleri müşterinin anlayacağı faydalara çevirir. Tarama kolaylığı için kısa bir tanıtım paragrafı, madde işaretli öne çıkan özellikler ve bir kapanış cümlesi üretir.',
-    useCases: [
-      'Yüzlerce ürünlük kataloğa hızlıca açıklama yazmak',
-      'Tedarikçiden gelen kuru teknik listeyi satış metnine çevirmek',
-      'Pazaryeri listelerini rakiplerden ayrıştırmak',
-    ],
-    faq: [
-      {
-        q: 'Vermediğim özellikleri ekliyor mu?',
-        a: 'Hayır. Araç yalnızca girdiğiniz özellikleri kullanır; garanti, sertifika veya ölçü uydurmaz.',
-      },
-      {
-        q: 'SEO açısından faydalı mı?',
-        a: 'Evet. Benzersiz ürün açıklamaları, tedarikçi metnini kopyalayan mağazalara göre arama sonuçlarında avantaj sağlar.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-prompt-generator',
-    name: 'AI Prompt Üretici',
-    category: 'ai',
-    description: 'Fikrinizi ayrıntılı ve etkili yapay zekâ prompt’una çevirin.',
-    icon: 'Wand2',
-    keywords: ['prompt generator', 'prompt yazma', 'ai komut', 'prompt mühendisliği'],
-    popularity: 88,
-    added: '2025-03-06',
-    badges: ['new', 'trending'],
-    live: true,
-    about:
-      'AI Prompt Üretici, kısa fikrinizi rol, bağlam, görev, kısıtlar ve istenen çıktı biçimi içeren ayrıntılı bir prompt’a dönüştürür. Çıktıyı doğrudan kopyalayıp istediğiniz yapay zekâ aracında kullanabilirsiniz.',
-    useCases: [
-      'Belirsiz bir fikirden tekrar kullanılabilir bir prompt şablonu çıkarmak',
-      'Görsel üretim araçları için ayrıntılı sahne tarifi yazmak',
-      'Ekip içinde standart prompt kütüphanesi oluşturmak',
-    ],
-    faq: [
-      {
-        q: 'Hangi araçlarda kullanabilirim?',
-        a: 'Üretilen prompt genel amaçlıdır; metin, görsel, kod veya veri analizi araçlarından hangisi için istediğinizi formdan seçebilirsiniz.',
-      },
-      {
-        q: 'Neden uzun prompt daha iyi sonuç veriyor?',
-        a: 'Rol, kısıt ve çıktı biçimi belirtildiğinde model tahmin yürütmek zorunda kalmaz; sonuç beklentinize daha yakın olur.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-rewrite-tool',
-    name: 'AI Yeniden Yazma',
-    category: 'ai',
-    description: 'Metninizi anlamını koruyarak farklı ton ve üslupta yeniden yazın.',
-    icon: 'RefreshCw',
-    keywords: ['rewrite', 'metin yeniden yazma', 'paraphrase', 'metin sadeleştirme'],
-    popularity: 87,
-    added: '2025-03-06',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI Yeniden Yazma, metninizi anlamını ve olgusal içeriğini koruyarak seçtiğiniz amaca göre yeniden kurgular: sadeleştirme, kısaltma, detaylandırma veya ton değişikliği. Yeni bilgi eklemez, mevcut bilgiyi çıkarmaz.',
-    useCases: [
-      'Teknik bir metni müşterinin anlayacağı dile çevirmek',
-      'Uzun bir paragrafı karakter sınırına sığdırmak',
-      'Resmî bir yazıyı daha samimi hale getirmek',
-    ],
-    faq: [
-      {
-        q: 'Anlam değişiyor mu?',
-        a: 'Hayır, amaç anlamı korumaktır. Yine de önemli belgelerde çıktıyı orijinaliyle karşılaştırmanızı öneririz.',
-      },
-      {
-        q: 'Ne kadar uzun metin girebilirim?',
-        a: 'Birkaç sayfalık metinler sorunsuz işlenir. Çok uzun içerikleri bölümler halinde göndermek daha iyi sonuç verir.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-hashtag-generator',
-    name: 'AI Hashtag Üretici',
-    category: 'ai',
-    description: 'İçeriğinize uygun, erişimi artıran hashtag setleri oluşturun.',
-    icon: 'Hash',
-    keywords: ['hashtag generator', 'etiket üretici', 'instagram hashtag', 'tiktok etiket'],
-    popularity: 79,
-    added: '2025-03-08',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI Hashtag Üretici, popüler, orta ve niş hacimli etiketleri dengeleyen setler üretir. Yalnızca yüksek hacimli etiketler kullanmak içeriğin kaybolmasına yol açtığı için bu denge erişim açısından belirleyicidir.',
-    useCases: [
-      'Yeni bir hesapla niş etiketler üzerinden görünürlük kazanmak',
-      'Kampanya gönderileri için hazır etiket seti oluşturmak',
-      'Farklı platformlara uygun etiket stratejisi kurmak',
-    ],
-    faq: [
-      {
-        q: 'Etiketlerin gerçek hacmini ölçüyor mu?',
-        a: 'Hayır. Araç canlı platform verisine bağlanmaz; konuya uygunluğa ve yaygın kullanım kalıplarına göre öneri üretir. Kritik kampanyalarda platformun kendi arama sonuçlarından doğrulayın.',
-      },
-      {
-        q: 'Kaç hashtag kullanmalıyım?',
-        a: 'Instagram’da 10-20, LinkedIn’de 3-5, X’te 1-2 etiket genellikle en iyi sonucu verir.',
-      },
-    ],
-  },
-  {
-    slug: 'ai-title-generator',
-    name: 'AI Başlık Üretici',
-    category: 'ai',
-    description: 'Tıklanma oranı yüksek başlık alternatifleri üretin.',
-    icon: 'Heading1',
-    keywords: ['başlık üretici', 'title generator', 'seo başlık', 'youtube başlık'],
-    popularity: 82,
-    added: '2025-03-08',
-    badges: ['new'],
-    live: true,
-    about:
-      'AI Başlık Üretici, merak uyandıran ama abartıya kaçmayan 10 başlık alternatifi üretir. Her başlığın karakter sayısını gösterir ve SEO için kritik olan 60 karakter sınırını aşanları işaretler.',
-    useCases: [
-      'Blog yazısı için A/B testine uygun başlık havuzu oluşturmak',
-      'YouTube videosunun tıklanma oranını artıracak alternatifler denemek',
-      'E-posta kampanyası konu satırlarını çeşitlendirmek',
-    ],
-    faq: [
-      {
-        q: 'Neden 60 karakter sınırı?',
-        a: 'Google arama sonuçlarında başlıkların yaklaşık 60 karakterden sonrası kesilir. Daha uzun başlıklar kullanılabilir ama önemli kelimeler başa alınmalıdır.',
-      },
-      {
-        q: 'Clickbait üretiyor mu?',
-        a: 'Hayır. Araç merak uyandıran ama içeriğin karşılayabileceği başlıklar üretecek şekilde ayarlandı; boş vaatlerden kaçınır.',
-      },
-    ],
-  },
   // ─────────────────────────────── SEO ───────────────────────────────
   {
     slug: 'meta-tag-generator',
@@ -1184,17 +887,6 @@ export const tools: Tool[] = [
     live: true,
   },
   {
-    slug: 'bmi-calculator',
-    name: 'Vücut Kitle İndeksi',
-    category: 'utility',
-    description: 'Boy ve kilonuzdan BMI değerinizi ve sağlık aralığınızı görün.',
-    icon: 'HeartPulse',
-    keywords: ['bmi', 'vücut kitle indeksi', 'kilo hesaplama'],
-    popularity: 82,
-    added: '2025-01-19',
-    live: true,
-  },
-  {
     slug: 'unit-converter',
     name: 'Birim Dönüştürücü',
     category: 'utility',
@@ -1470,34 +1162,6 @@ export const tools: Tool[] = [
     ],
   },
   {
-    slug: 'website-screenshot',
-    name: 'Site Ekran Görüntüsü',
-    category: 'website',
-    description: 'Herhangi bir sayfanın masaüstü ve mobil görüntüsünü alın.',
-    icon: 'Camera',
-    keywords: ['website screenshot', 'ekran görüntüsü', 'site görseli', 'sayfa görüntüsü'],
-    popularity: 76,
-    added: '2025-02-24',
-    live: true,
-    about:
-      'Site Ekran Görüntüsü, verdiğiniz adresin masaüstü (1440×900) veya mobil (390×844) görünümünü PNG olarak alır. Bu araç sunucu tarafında başsız tarayıcı gerektirir; kendi kurulumunuzda SCREENSHOT_API_URL ortam değişkenini tanımlayarak dilediğiniz sağlayıcıyı bağlayabilirsiniz.',
-    useCases: [
-      'Rakip sitelerin sayfa düzenini arşivlemek',
-      'Bir sayfanın belirli bir tarihteki halini kanıt olarak saklamak',
-      'Sunum ve raporlara site görselleri eklemek',
-    ],
-    faq: [
-      {
-        q: 'Araç neden yapılandırma istiyor?',
-        a: 'Ekran görüntüsü almak, sayfayı gerçekten çalıştıran bir tarayıcı gerektirir. Bunu her ziyaretçi için ücretsiz sunmak mümkün olmadığından, kendi sağlayıcınızı bağlayabileceğiniz bir yapı tercih edildi.',
-      },
-      {
-        q: 'Giriş gerektiren sayfaların görüntüsü alınır mı?',
-        a: 'Hayır. Yalnızca herkese açık sayfalar görüntülenebilir; oturum açılması gereken sayfalarda giriş ekranı görünür.',
-      },
-    ],
-  },
-  {
     slug: 'website-status-checker',
     name: 'Site Durum Kontrol',
     category: 'website',
@@ -1564,6 +1228,27 @@ export const tools: Tool[] = [
   ...healthTools,
   ...businessTools,
 ];
+
+export const tools: Tool[] = registry.map(withContent);
+
+/**
+ * `tool-content.ts` içindeki yazılı içeriği araca iliştirir.
+ *
+ * Dizinde zaten yazılmış bir alan varsa ona dokunulmaz: içerik dosyası yalnızca
+ * boşlukları doldurur. Böylece bir araç için elle yazılmış özel metin, toplu
+ * içerik dosyası yüzünden sessizce ezilmez.
+ */
+function withContent(tool: Tool): Tool {
+  const extra = toolContent[tool.slug];
+  if (!extra) return tool;
+  return {
+    ...tool,
+    about: tool.about ?? extra.about,
+    useCases: tool.useCases ?? extra.useCases,
+    faq: tool.faq ?? extra.faq,
+    steps: tool.steps ?? extra.steps,
+  };
+}
 
 export const toolMap = new Map(tools.map((t) => [t.slug, t]));
 
