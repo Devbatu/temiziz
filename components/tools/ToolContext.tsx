@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useRef } from 'react';
 import { track } from '@/components/analytics/Tracker';
+import { markAction } from '@/components/analytics/Recorder';
 
 /**
  * Hangi araç sayfasında olduğumuzu paylaşır; böylece ortak butonlar
@@ -25,11 +26,14 @@ export function useToolTracking() {
       if (!slug || ranOnce.current) return;
       ranOnce.current = true;
       track('tool_run', { tool: slug });
+      // Kayit oynaticinin zaman cizelgesinde gorunsun.
+      markAction('Araci calistirdi');
     },
     /** Sonuç kopyalandığında veya indirildiğinde — başarılı kullanım göstergesi. */
     trackResult(kind: 'copy' | 'download') {
       if (!slug) return;
       track('tool_result', { tool: slug, label: kind });
+      markAction(kind === 'copy' ? 'Sonucu kopyaladi' : 'Sonucu indirdi');
     },
   };
 }

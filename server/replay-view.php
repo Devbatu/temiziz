@@ -105,9 +105,10 @@ $sure   = (int) $k['duration_ms'];
           pointer-events:none;z-index:5}
   #ripple{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
           border:2px solid #fbbf24;opacity:0;pointer-events:none;z-index:6}
-  .ctrl{display:flex;align-items:center;gap:12px;margin-top:12px;background:var(--card);
+  .ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;background:var(--card);
         border:1px solid var(--line);border-radius:11px;padding:11px 14px}
-  input[type=range]{flex:1;accent-color:var(--accent)}
+  input[type=range]{flex:1 1 180px;min-width:140px;accent-color:var(--accent)}
+  @media (max-width:520px){#clock{min-width:0;flex-basis:100%}}
   #clock{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px;min-width:88px}
   #note{margin-top:10px;min-height:22px;font-size:13px;color:#8fd3ff}
   .log{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:11px;
@@ -116,6 +117,12 @@ $sure   = (int) $k['duration_ms'];
   .log ol{margin:0;padding-left:20px}
   .log li{margin:3px 0;font-size:13px;color:#c8d0e4}
   .log li b{color:#8fd3ff}
+  .log li.eylem-satir{background:rgba(52,211,153,.10);border-radius:5px;
+             margin-left:-6px;padding:1px 6px}
+  .log li b.eylem{color:#34d399}
+  .rozet{display:inline-block;background:rgba(52,211,153,.16);color:#34d399;
+         border:1px solid rgba(52,211,153,.35);border-radius:999px;
+         padding:3px 11px;font-size:12.5px;font-weight:700}
   .log li.on{background:rgba(91,140,255,.16);border-radius:5px;
              margin-left:-6px;padding:1px 6px;color:#fff}
   .warn{margin-top:14px;color:var(--muted);font-size:12.5px;line-height:1.65;
@@ -217,9 +224,15 @@ $sure   = (int) $k['duration_ms'];
    * iframe kaydedilen ekran genisliginde olusturulur, sonra sahneye sigacak
    * sekilde olceklenir. Boylece duzen ziyaretcinin gordugu gibi kalir.
    */
+  var offsetX = 0;   /* sahne icinde yatay ortalama payi */
+
   function layout() {
     var w = stage.clientWidth;
     var scale = Math.min(1, w / VW);
+    /* Kayit dar bir ekrandan (telefon) geliyorsa olcek 1 kalir ve cerceve
+       genis sahnenin soluna yapisirdi. Artan bosluk ikiye bolunup sola pay
+       olarak veriliyor, boylece onizleme ortalanir. */
+    offsetX = Math.max(0, Math.round((w - VW * scale) / 2));
     frame.style.width = VW + 'px';
     /* iframe BELGENIN TAM BOYUNDA olusturulur. Yalnizca ekran yuksekligi
        kadar yapilirsa sayfanin alt kismi hic render edilmez ve kaydirma
@@ -244,6 +257,11 @@ $sure   = (int) $k['duration_ms'];
     } else if (f[0] === 2) {
       li.innerHTML = sn + ' &mdash; <b>Uzerinde bekledi</b> (' +
         (f[3] / 1000).toFixed(1) + ' sn): ' + escapeHtml(f[2]);
+    } else if (f[0] === 4) {
+      /* Eylem isareti: kullanicinin ne yaptigi. Girdigi veri kaydedilmedigi
+         icin sonuc ekrani yeniden uretilemiyor; akis buradan okunuyor. */
+      li.innerHTML = sn + ' &mdash; <b class="eylem">' + escapeHtml(f[2]) + '</b>';
+      li.classList.add('eylem-satir');
     } else {
       li.textContent = sn + ' — Kaydirdi: %' + Math.round(f[2] / 10);
     }
@@ -269,10 +287,11 @@ $sure   = (int) $k['duration_ms'];
 
   /** iframe'i ve imleci o anki kaydirma konumuna gore yerlestirir. */
   function yerlestir() {
-    frame.style.transform = 'scale(' + scale + ') translateY(' + (-kaydirmaPx) + 'px)';
+    frame.style.transform = 'translateX(' + offsetX + 'px) scale(' + scale + ')'
+      + ' translateY(' + (-kaydirmaPx) + 'px)';
     if (sonFare) {
       var docY = (sonFare[3] / 1000) * DH;
-      cursor.style.left = ((sonFare[2] / 1000) * VW * scale) + 'px';
+      cursor.style.left = (offsetX + (sonFare[2] / 1000) * VW * scale) + 'px';
       cursor.style.top  = ((docY - kaydirmaPx) * scale) + 'px';
     }
   }
@@ -296,7 +315,18 @@ $sure   = (int) $k['duration_ms'];
     if (mouse) { sonFare = mouse; }
     yerlestir();
 
-    note.textContent = hover ? 'Uzerinde bekliyor: ' + hover[2] : '';
+    /* Son eylem, uzerinden 4 saniye gecene kadar ekranda kalir. */
+    var eylem = null;
+    for (var j = 0; j < FRAMES.length; j++) {
+      var g = FRAMES[j];
+      if (g[1] > time) { break; }
+      if (g[0] === 4 && time - g[1] < 4000) { eylem = g; }
+    }
+    if (eylem) {
+      note.innerHTML = '<span class="rozet">' + escapeHtml(eylem[2]) + '</span>';
+    } else {
+      note.textContent = hover ? 'Uzerinde bekliyor: ' + hover[2] : '';
+    }
     seek.value = time;
     clock.textContent = (time / 1000).toFixed(1) + ' / ' + (TOTAL / 1000).toFixed(1) + ' sn';
     dokumuIsaretle(time);
@@ -323,7 +353,7 @@ $sure   = (int) $k['duration_ms'];
 
   function flash(f) {
     var docY = (f[3] / 1000) * DH;
-    ripple.style.left = ((f[2] / 1000) * VW * scale) + 'px';
+    ripple.style.left = (offsetX + (f[2] / 1000) * VW * scale) + 'px';
     ripple.style.top  = ((docY - kaydirmaPx) * scale) + 'px';
     ripple.style.transition = 'none';
     ripple.style.opacity = '1';

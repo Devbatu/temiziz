@@ -30,7 +30,22 @@ type Frame =
   | [0, number, number, number] // fare: t, x‰, y‰
   | [1, number, number, number, string] // tıklama: t, x‰, y‰, etiket
   | [2, number, string, number] // hover: t, etiket, süre
-  | [3, number, number]; // kaydırma: t, y‰
+  | [3, number, number] // kaydırma: t, y‰
+  | [4, number, string]; // eylem: t, açıklama
+
+/**
+ * Etkin kaydediciye dışarıdan işaret bırakmak için.
+ *
+ * Oynatmada aracın kendisi baştan yüklenir; kullanıcının girdiği veri
+ * kaydedilmediği için sonuç ekranı yeniden üretilemez. Bunun yerine NE
+ * OLDUĞUNU zaman çizelgesine yazıyoruz: "aracı çalıştırdı", "sonucu indirdi",
+ * "3 dosya seçti". Böylece içerik kaydedilmeden akış görünür oluyor.
+ */
+let etkinIsaret: ((aciklama: string) => void) | null = null;
+
+export function markAction(aciklama: string): void {
+  etkinIsaret?.(aciklama);
+}
 
 export interface Replay {
   vw: number;
@@ -161,14 +176,40 @@ export function startRecording(): { stop: () => Replay | null } {
     frames.push([3, t, y]);
   }
 
+  /** Dışarıdan gelen eylem işaretleri (araç çalıştı, sonuç indirildi…). */
+  function isaret(aciklama: string) {
+    if (full()) return;
+    const temiz = aciklama.replace(/\s+/g, ' ').trim().slice(0, 60);
+    if (temiz !== '') frames.push([4, now(), temiz]);
+  }
+  etkinIsaret = isaret;
+
+  /**
+   * Dosya seçimi. Yalnızca DOSYA SAYISI ve toplam boyut kaydedilir —
+   * dosya adları ve içerikleri asla okunmaz.
+   */
+  function onFileChange(e: Event) {
+    const el = e.target as HTMLInputElement | null;
+    if (!el || el.type !== 'file' || !el.files) return;
+    const adet = el.files.length;
+    if (adet === 0) return;
+    let bayt = 0;
+    for (const f of Array.from(el.files)) bayt += f.size;
+    const mb = bayt / 1048576;
+    isaret(`${adet} dosya seçildi (${mb < 1 ? `${Math.round(bayt / 1024)} KB` : `${mb.toFixed(1)} MB`})`);
+  }
+
   window.addEventListener('mousemove', onMove, { passive: true });
   window.addEventListener('click', onClick, { passive: true, capture: true });
   window.addEventListener('mouseover', onOver, { passive: true, capture: true });
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('change', onFileChange, { passive: true, capture: true });
 
   return {
     stop() {
       flushHover();
+      if (etkinIsaret === isaret) etkinIsaret = null;
+      window.removeEventListener('change', onFileChange, { capture: true } as EventListenerOptions);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('click', onClick, { capture: true } as EventListenerOptions);
       window.removeEventListener('mouseover', onOver, { capture: true } as EventListenerOptions);

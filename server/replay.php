@@ -98,6 +98,12 @@ foreach ($in['frames'] as $f) {
         case 3: // kaydırma
             $temiz[] = [3, $t, $sayi($f[2] ?? 0, 1000)];
             break;
+        case 4: // eylem işareti — "aracı çalıştırdı", "3 dosya seçildi"
+            $ad = mb_substr(preg_replace('/[^\p{L}\p{N} .,:%\/_\-()]/u', '', (string) ($f[2] ?? '')) ?? '', 0, 60);
+            if ($ad !== '') {
+                $temiz[] = [4, $t, $ad];
+            }
+            break;
     }
     if (count($temiz) >= 400) {
         break;
