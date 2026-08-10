@@ -104,17 +104,21 @@ Redirect 301 /tools/bmi-calculator/ /tools/bmi-hesaplama/
 # Kaldirilan araclar: calismak icin bir uygulama sunucusu veya ucretli
 # bir API gerektiriyorlardi. Calismayan sayfa birakmak yerine kategoriye
 # yonlendiriliyorlar.
-Redirect 301 /tools/ai-resume-builder/ /category/ai/
-Redirect 301 /tools/ai-cover-letter/ /category/ai/
-Redirect 301 /tools/ai-email-generator/ /category/ai/
-Redirect 301 /tools/ai-blog-writer/ /category/ai/
-Redirect 301 /tools/ai-caption-generator/ /category/ai/
-Redirect 301 /tools/ai-product-description/ /category/ai/
-Redirect 301 /tools/ai-prompt-generator/ /category/ai/
-Redirect 301 /tools/ai-rewrite-tool/ /category/ai/
-Redirect 301 /tools/ai-hashtag-generator/ /category/ai/
-Redirect 301 /tools/ai-title-generator/ /category/ai/
+Redirect 301 /tools/ai-resume-builder/ /tools/
+Redirect 301 /tools/ai-cover-letter/ /tools/
+Redirect 301 /tools/ai-email-generator/ /tools/
+Redirect 301 /tools/ai-blog-writer/ /tools/
+Redirect 301 /tools/ai-caption-generator/ /tools/
+Redirect 301 /tools/ai-product-description/ /tools/
+Redirect 301 /tools/ai-prompt-generator/ /tools/
+Redirect 301 /tools/ai-rewrite-tool/ /tools/
+Redirect 301 /tools/ai-hashtag-generator/ /tools/
+Redirect 301 /tools/ai-title-generator/ /tools/
 Redirect 301 /tools/website-screenshot/ /category/website/
+
+# AI kategorisindeki tum araclar kaldirildi; bos kategori sayfasi
+# Google tarafindan soft 404 sayilir. Kategori adresi araclar sayfasina gider.
+Redirect 301 /category/ai/ /tools/
 Redirect 301 /tools/bmi-calculator /tools/bmi-hesaplama/
 
 # Tek kanonik adres: https + www'suz.

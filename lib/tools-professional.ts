@@ -666,4 +666,447 @@ export const businessTools: Tool[] = [
       },
     ],
   },
+
+  {
+    slug: 'duzeltilmis-kalsiyum-hesaplama',
+    name: 'Düzeltilmiş Kalsiyum Hesaplama',
+    category: 'health',
+    description:
+      'Ölçülen kalsiyum ve albümin değerinden düzeltilmiş kalsiyumu hesaplayın; hipoalbüminemide gerçek kalsiyum durumunu görün.',
+    icon: 'TestTubes',
+    keywords: ['düzeltilmiş kalsiyum', 'corrected calcium', 'albümin kalsiyum', 'hipokalsemi hesaplama'],
+    popularity: 62,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Serum albümini düşük olduğunda toplam kalsiyum olduğundan düşük görünür, çünkü kalsiyumun bir kısmı albümine bağlıdır. Düzeltilmiş kalsiyum formülü bu etkiyi telafi eder ve iyonize kalsiyum durumunu daha doğru yansıtır.',
+    useCases: [
+      'Hipoalbüminemili hastada gerçek kalsiyum durumunu değerlendirmek',
+      'Yoğun bakım hastalarında kalsiyumu doğru yorumlamak',
+      'Rutin biyokimya panelini düzeltmek',
+    ],
+    faq: [
+      {
+        q: 'Formül nedir?',
+        a: 'Düzeltilmiş kalsiyum = ölçülen kalsiyum + 0,8 × (4,0 − albümin). Albümin g/dL, kalsiyum mg/dL cinsindendir.',
+      },
+      {
+        q: 'Ne zaman kullanılır?',
+        a: 'Serum albümini normalin (4,0 g/dL) altında olduğunda. Albümin normalse düzeltmeye gerek yoktur.',
+      },
+      {
+        q: 'İyonize kalsiyum yerine geçer mi?',
+        a: 'Hayır. En doğru değer doğrudan iyonize kalsiyum ölçümüdür; bu formül yalnızca bir tahmindir.',
+      },
+    ],
+  },
+  {
+    slug: 'anyon-acigi-hesaplama',
+    name: 'Anyon Açığı Hesaplama',
+    category: 'health',
+    description:
+      'Sodyum, klor ve bikarbonattan anyon açığını hesaplayın; albümin düzeltmesiyle metabolik asidoz ayırıcı tanısına başlayın.',
+    icon: 'Droplet',
+    keywords: ['anyon açığı', 'anion gap hesaplama', 'metabolik asidoz', 'anyon gap'],
+    popularity: 60,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Anyon açığı, kanda ölçülmeyen anyonların bir göstergesidir ve metabolik asidozun ayırıcı tanısında ilk adımdır. Yüksek anyon açığı laktik asidoz, ketoasidoz, toksinler ve üremiyi düşündürür.',
+    useCases: [
+      'Metabolik asidozu yüksek ve normal anyon açıklı olarak ayırmak',
+      'Laktik asidoz ve ketoasidoz şüphesini değerlendirmek',
+      'Toksik alımlarda tarama yapmak',
+    ],
+    faq: [
+      {
+        q: 'Anyon açığı normal değeri kaçtır?',
+        a: 'Genellikle 8–12 mEq/L kabul edilir. Değer laboratuvara ve potasyumun dahil edilip edilmemesine göre değişebilir.',
+      },
+      {
+        q: 'Albümin düzeltmesi neden gerekir?',
+        a: 'Albümin başlıca ölçülmeyen anyondur; düşük albümin anyon açığını olduğundan düşük gösterir. Her 1 g/dL düşüş için yaklaşık 2,5 eklenir.',
+      },
+      {
+        q: 'Potasyum dahil edilir mi?',
+        a: 'Çoğu klinik uygulamada edilmez. Dahil edilirse normal aralık yaklaşık 12–16 mEq/L olur.',
+      },
+    ],
+  },
+  {
+    slug: 'map-hesaplama',
+    name: 'Ortalama Arter Basıncı (MAP) Hesaplama',
+    category: 'health',
+    description:
+      'Sistolik ve diyastolik kan basıncından ortalama arter basıncını (MAP) hesaplayın; organ perfüzyonu eşiğini görün.',
+    icon: 'Gauge',
+    keywords: ['map hesaplama', 'ortalama arter basıncı', 'mean arterial pressure', 'perfüzyon basıncı'],
+    popularity: 64,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Ortalama arter basıncı, bir kalp döngüsü boyunca damarlardaki ortalama basıncı gösterir ve organ perfüzyonunun temel göstergesidir. Yoğun bakımda ve şok yönetiminde 65 mmHg eşiği sık kullanılır.',
+    useCases: [
+      'Şok hastasında organ perfüzyonunu değerlendirmek',
+      'Vazopresör tedavisinde hedef basıncı takip etmek',
+      'Hipertansiyon değerlendirmesine ek veri sağlamak',
+    ],
+    faq: [
+      {
+        q: 'MAP nasıl hesaplanır?',
+        a: 'MAP = (sistolik + 2 × diyastolik) / 3. Diyastolik iki kez sayılır çünkü kalp döngüsünün üçte ikisi diyastoldedir.',
+      },
+      {
+        q: 'Normal MAP kaçtır?',
+        a: '70–100 mmHg normal kabul edilir. 65 mmHg altı organ perfüzyonu için risk eşiğidir.',
+      },
+      {
+        q: 'Neden diyastolik ağırlıklı?',
+        a: 'Kalp diyastolde daha uzun süre kaldığı için ortalama basınca katkısı sistolikten fazladır.',
+      },
+    ],
+  },
+  {
+    slug: 'bsa-hesaplama',
+    name: 'Vücut Yüzey Alanı (BSA) Hesaplama',
+    category: 'health',
+    description:
+      'Boy ve kilodan vücut yüzey alanını Mosteller formülüyle hesaplayın; kemoterapi dozu ve kardiyak indeks için kullanın.',
+    icon: 'PersonStanding',
+    keywords: ['bsa hesaplama', 'vücut yüzey alanı', 'body surface area', 'mosteller'],
+    popularity: 58,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Vücut yüzey alanı, kilodan çok vücut büyüklüğünü yansıttığı için ilaç dozlaması (özellikle kemoterapi) ve kardiyak indeks gibi hesaplarda kullanılır. Mosteller formülü en yaygın ve pratik yöntemdir.',
+    useCases: [
+      'Kemoterapi ilaç dozunu vücut büyüklüğüne göre hesaplamak',
+      'Kardiyak indeks için kalp debisini normalize etmek',
+      'Pediatride ilaç dozunu ölçeklemek',
+    ],
+    faq: [
+      {
+        q: 'Mosteller formülü nedir?',
+        a: 'BSA (m²) = √(boy[cm] × kilo[kg] / 3600). Basit ve klinikte en çok tercih edilen formüldür.',
+      },
+      {
+        q: 'Ortalama BSA kaçtır?',
+        a: 'Yetişkinlerde yaklaşık 1,7 m²; erkeklerde biraz daha yüksektir.',
+      },
+      {
+        q: 'Hangi formül daha doğru?',
+        a: 'Mosteller, DuBois ve Haycock formülleri birbirine yakın sonuç verir; Mosteller hesap kolaylığı nedeniyle öne çıkar.',
+      },
+    ],
+  },
+  {
+    slug: 'ideal-kilo-hesaplama',
+    name: 'İdeal Vücut Ağırlığı Hesaplama',
+    category: 'health',
+    description:
+      'Boy ve cinsiyetten ideal vücut ağırlığını Devine formülüyle hesaplayın; ilaç dozu ve ventilasyon ayarları için kullanın.',
+    icon: 'PersonStanding',
+    keywords: ['ideal kilo hesaplama', 'ideal vücut ağırlığı', 'devine formülü', 'ibw'],
+    popularity: 66,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'İdeal vücut ağırlığı, bir sağlık hedefi değil; ilaç dozlaması ve mekanik ventilasyonda tidal hacim ayarı gibi hesaplarda kullanılan bir referanstır. Devine formülü klinikte en yaygın kullanılandır.',
+    useCases: [
+      'Mekanik ventilasyonda tidal hacmi ideal kiloya göre ayarlamak',
+      'Bazı ilaçların dozunu ideal kiloya göre hesaplamak',
+      'Obez hastalarda dozlama referansı belirlemek',
+    ],
+    faq: [
+      {
+        q: 'Devine formülü nedir?',
+        a: 'Erkek 50 + 2,3 × (inç − 60), kadın 45,5 + 2,3 × (inç − 60); boyun 152,4 cm üzerindeki kısmı inç cinsinden alınır.',
+      },
+      {
+        q: 'İdeal kilo gerçek hedef kilo mu?',
+        a: 'Hayır. Bu bir klinik hesap referansıdır; kişisel sağlıklı kilo aralığı için BKİ ve vücut kompozisyonu değerlendirilir.',
+      },
+      {
+        q: 'Neden ilaç dozunda kullanılır?',
+        a: 'Bazı ilaçlar yağ dokusunda dağılmaz; gerçek kilo yerine ideal kilo kullanmak doz aşımını önler.',
+      },
+    ],
+  },
+  {
+    slug: 'iv-damla-hesaplama',
+    name: 'IV İnfüzyon ve Damla Hızı Hesaplama',
+    category: 'health',
+    description:
+      'Hacim, süre ve set damla faktöründen dakikadaki damla sayısını ve mL/saat infüzyon hızını hesaplayın.',
+    icon: 'Syringe',
+    keywords: ['iv damla hesaplama', 'infüzyon hızı', 'damla hızı', 'serum hızı', 'gtt/dk'],
+    popularity: 68,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Serum ve ilaç infüzyonlarında istenen sürede verilecek sıvı için damla hızının doğru ayarlanması gerekir. Araç hem dakikadaki damla sayısını hem de infüzyon pompası için mL/saat değerini hesaplar.',
+    useCases: [
+      'Serumu istenen sürede vermek için damla hızını ayarlamak',
+      'İnfüzyon pompası için mL/saat değerini bulmak',
+      'Pediatride mikro set ile hassas hız belirlemek',
+    ],
+    faq: [
+      {
+        q: 'Damla hızı nasıl hesaplanır?',
+        a: 'Damla/dk = (hacim[mL] × damla faktörü) / süre[dk]. Damla faktörü setin ambalajında yazar.',
+      },
+      {
+        q: 'Makro ve mikro set farkı nedir?',
+        a: 'Makro setler 10–20 gtt/mL, mikro (pediatrik) setler 60 gtt/mL’dir. Hassas ve düşük hacimli infüzyonlarda mikro set kullanılır.',
+      },
+      {
+        q: 'mL/saat neden ayrıca veriliyor?',
+        a: 'İnfüzyon pompaları damla değil mL/saat ister; her iki değer birlikte gösterilir.',
+      },
+    ],
+  },
+  {
+    slug: 'gebelik-hesaplama',
+    name: 'Gebelik Haftası ve Doğum Tarihi Hesaplama',
+    category: 'health',
+    description:
+      'Son adet tarihinden gebelik haftasını ve tahmini doğum tarihini Naegele kuralıyla hesaplayın.',
+    icon: 'Baby',
+    keywords: ['gebelik hesaplama', 'doğum tarihi hesaplama', 'gebelik haftası', 'naegele', 'tahmini doğum'],
+    popularity: 76,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Son adet tarihine dayanarak gebeliğin kaçıncı haftasında olunduğunu ve tahmini doğum tarihini hesaplar. Naegele kuralı 28 günlük düzenli döngü varsayar ve klinikte standart başlangıç yöntemidir.',
+    useCases: [
+      'Gebeliğin kaçıncı haftasında olunduğunu belirlemek',
+      'Tahmini doğum tarihini hesaplamak',
+      'Takip ve tarama testlerinin zamanlamasını planlamak',
+    ],
+    faq: [
+      {
+        q: 'Doğum tarihi nasıl hesaplanır?',
+        a: 'Naegele kuralı: son adet tarihi + 280 gün (40 hafta). Bu, 28 günlük düzenli döngü varsayar.',
+      },
+      {
+        q: 'Düzensiz döngüde geçerli mi?',
+        a: 'Kısıtlıdır. Döngü 28 günden farklıysa ve erken ultrasonografi ölçümü varsa, tarih ultrasonografiye göre düzeltilmelidir.',
+      },
+      {
+        q: 'Hesap kesin mi?',
+        a: 'Hayır, tahminidir. Doğumların yalnızca küçük bir kısmı tam bu tarihte gerçekleşir; birkaç haftalık sapma normaldir.',
+      },
+    ],
+  },
+  {
+    slug: 'qtc-hesaplama',
+    name: 'Düzeltilmiş QT (QTc) Hesaplama',
+    category: 'health',
+    description:
+      'QT aralığı ve kalp hızından QTc değerini Bazett ve Fridericia formülleriyle hesaplayın; uzun QT eşiğini görün.',
+    icon: 'HeartPulse',
+    keywords: ['qtc hesaplama', 'düzeltilmiş qt', 'bazett formülü', 'uzun qt', 'qt aralığı'],
+    popularity: 62,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'QT aralığı kalp hızıyla değişir; QTc, bu aralığı kalp hızına göre düzelterek karşılaştırılabilir hale getirir. Uzun QTc, ilaç yan etkilerinde ve ani ritim bozukluğu riskinde kritik bir göstergedir.',
+    useCases: [
+      'İlaç başlamadan önce QT uzaması riskini değerlendirmek',
+      'EKG’de ölçülen QT’yi kalp hızına göre düzeltmek',
+      'Uzun QT sendromu şüphesini taramak',
+    ],
+    faq: [
+      {
+        q: 'Bazett ile Fridericia farkı nedir?',
+        a: 'Bazett QTc = QT / √RR, Fridericia = QT / ∛RR. Bazett çok yüksek ve düşük kalp hızlarında sapar; Fridericia bu uçlarda daha güvenilirdir.',
+      },
+      {
+        q: 'Uzun QT eşiği kaçtır?',
+        a: 'Erkeklerde 450 ms, kadınlarda 460 ms üzeri uzun kabul edilir. 500 ms ve üzeri belirgin risk taşır.',
+      },
+      {
+        q: 'RR aralığı nedir?',
+        a: 'Ardışık iki kalp atımı arasındaki süredir; RR = 60 / kalp hızı (saniye).',
+      },
+    ],
+  },
+  {
+    slug: 'ohm-yasasi-hesaplama',
+    name: 'Ohm Yasası Hesaplama',
+    category: 'engineering',
+    description:
+      'Gerilim, akım, direnç ve güçten ikisini girin; kalan iki değeri Ohm yasasıyla anında hesaplayın.',
+    icon: 'Zap',
+    keywords: ['ohm yasası', 'ohm kanunu hesaplama', 'v=ir', 'gerilim akım direnç', 'güç hesaplama'],
+    popularity: 72,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Ohm yasası, bir devredeki gerilim, akım ve direnç arasındaki temel ilişkiyi tanımlar. Bu araç, dört büyüklükten (gerilim, akım, direnç, güç) herhangi ikisini bildiğinizde diğer ikisini hesaplar.',
+    useCases: [
+      'Bir direnç üzerindeki akımı veya gücü bulmak',
+      'LED için gereken seri direnci hesaplamak',
+      'Devre elemanının güç değerini kontrol etmek',
+    ],
+    faq: [
+      {
+        q: 'Ohm yasası formülü nedir?',
+        a: 'V = I × R. Güç ise P = V × I biçiminde bağlanır; bu ikisinden P = I²R ve P = V²/R türetilir.',
+      },
+      {
+        q: 'Alternatif akımda geçerli mi?',
+        a: 'Bu araç dirençsel yük ve DC varsayar. AC’de motor ve trafo gibi yüklerde güç faktörü ayrıca hesaplanmalıdır.',
+      },
+      {
+        q: 'Kaç değer girmeliyim?',
+        a: 'En az iki değer. İkisini girdiğinizde kalan ikisi otomatik hesaplanır.',
+      },
+    ],
+  },
+  {
+    slug: 'uc-faz-guc-hesaplama',
+    name: 'Üç Fazlı Güç Hesaplama',
+    category: 'engineering',
+    description:
+      'Hat gerilimi, akım ve güç faktöründen aktif (kW), görünür (kVA) ve reaktif (kVAR) gücü hesaplayın.',
+    icon: 'Cpu',
+    keywords: ['üç fazlı güç', 'kva hesaplama', 'kw hesaplama', 'trifaze güç', 'güç faktörü'],
+    popularity: 66,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Üç fazlı sistemlerde güç, hat gerilimi ve akımın yanı sıra güç faktörüne bağlıdır. Araç aktif, görünür ve reaktif gücü birlikte hesaplar; motor ve pano seçiminde kullanılır.',
+    useCases: [
+      'Motor veya panonun çektiği gücü hesaplamak',
+      'Jeneratör ve trafo boyutlandırmasına veri sağlamak',
+      'Güç faktörünün akım üzerindeki etkisini görmek',
+    ],
+    faq: [
+      {
+        q: 'Üç fazlı güç formülü nedir?',
+        a: 'S = √3 × V × I (kVA), P = S × cosφ (kW). Gerilim fazlar arası (hat) değeridir.',
+      },
+      {
+        q: 'Türkiye’de üç faz gerilimi kaçtır?',
+        a: 'Fazlar arası 400 V, faz-nötr 230 V’tur.',
+      },
+      {
+        q: 'Güç faktörü neden önemli?',
+        a: 'Düşük güç faktörü, aynı iş için daha yüksek akım çekilmesine ve kayıplara yol açar; kompanzasyonla düzeltilir.',
+      },
+    ],
+  },
+  {
+    slug: 'direnc-renk-kodu',
+    name: 'Direnç Renk Kodu Hesaplama',
+    category: 'engineering',
+    description:
+      'Dört bantlı direncin renklerini seçin; direnç değerini ve toleransını ohm, kΩ ve MΩ cinsinden anında görün.',
+    icon: 'CircuitBoard',
+    keywords: ['direnç renk kodu', 'resistor color code', 'direnç hesaplama', 'renk kodu okuma', '4 bant direnç'],
+    popularity: 70,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Dirençlerin üzerindeki renk bantları direnç değerini ve toleransını kodlar. Bu araç dört bantlı standart dirençlerde renkleri seçerek değeri okumanızı sağlar; ilk iki bant rakam, üçüncü çarpan, dördüncü tolerans.',
+    useCases: [
+      'Devredeki bir direncin değerini bantlarından okumak',
+      'Elektronik projesi için doğru direnci seçmek',
+      'Öğrenim amacıyla renk kodunu pratik etmek',
+    ],
+    faq: [
+      {
+        q: 'Renk kodu nasıl okunur?',
+        a: 'İlk iki bant rakam, üçüncü bant çarpan, dördüncü bant toleranstır. Kahverengi-siyah-kırmızı-altın = 10 × 100 = 1 kΩ ±%5.',
+      },
+      {
+        q: '5 bantlı dirençlerde ne değişir?',
+        a: '5 bantlı hassas dirençlerde üç rakam bandı vardır; bu araç 4 bantlı standart dirençler içindir.',
+      },
+      {
+        q: 'Altın ve gümüş bant ne anlama gelir?',
+        a: 'Tolerans bandı olarak altın ±%5, gümüş ±%10 demektir. Çarpan konumunda ise altın 0,1, gümüş 0,01 çarpanıdır.',
+      },
+    ],
+  },
+  {
+    slug: 'kablo-gerilim-dusumu',
+    name: 'Kablo Gerilim Düşümü Hesaplama',
+    category: 'engineering',
+    description:
+      'Hat uzunluğu, akım, kesit ve iletken türünden kablo gerilim düşümünü volt ve yüzde olarak hesaplayın.',
+    icon: 'Cable',
+    keywords: ['kablo gerilim düşümü', 'voltage drop', 'kablo kesiti hesaplama', 'gerilim düşümü hesabı'],
+    popularity: 64,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'Uzun kablolarda iletkenin direnci nedeniyle gerilim düşer; bu düşüm belirli bir sınırı aşarsa cihazlar düzgün çalışmaz. Araç tek ve üç fazlı sistemlerde gerilim düşümünü volt ve yüzde olarak hesaplar.',
+    useCases: [
+      'Uzun bir hatta kablo kesitinin yeterli olup olmadığını kontrol etmek',
+      'Aydınlatma ve priz devrelerinde gerilim düşümünü doğrulamak',
+      'Kesit büyütmenin gerekip gerekmediğine karar vermek',
+    ],
+    faq: [
+      {
+        q: 'Gerilim düşümü formülü nedir?',
+        a: 'Tek fazda ΔV = 2 × L × I × ρ / A, üç fazda ΔV = √3 × L × I × ρ / A. ρ bakır için 0,0175, alüminyum için 0,0282 Ω·mm²/m.',
+      },
+      {
+        q: 'Kabul edilebilir sınır nedir?',
+        a: 'Yaygın kural aydınlatmada %3, güç devrelerinde %5 üst sınırdır. Aşılıyorsa kesit büyütülür.',
+      },
+      {
+        q: 'Bu hesap proje için yeterli mi?',
+        a: 'Hayır, yaklaşıktır. Sıcaklık, döşeme biçimi ve güç faktörü sonucu etkiler; proje TS HD 60364 ve mühendis onayı gerektirir.',
+      },
+    ],
+  },
+  {
+    slug: 'dbm-watt-donusturucu',
+    name: 'dBm ↔ Watt Dönüştürücü',
+    category: 'engineering',
+    description:
+      'dBm değerini miliwatt ve watt cinsine çevirin; RF ve telekomünikasyon güç hesaplarında kullanın.',
+    icon: 'Radio',
+    keywords: ['dbm watt', 'dbm dönüştürücü', 'dbm to watt', 'rf güç hesaplama', 'dbm mw'],
+    popularity: 54,
+    added: '2026-08-07',
+    badges: ['new'],
+    live: true,
+    about:
+      'dBm, 1 miliwatt referansına göre logaritmik güç birimidir ve RF ile telekomünikasyonda yaygın kullanılır. Araç dBm değerini miliwatt ve watt cinsine çevirir.',
+    useCases: [
+      'Anten veya verici çıkış gücünü watt cinsine çevirmek',
+      'Sinyal seviyesini karşılaştırmak',
+      'Link bütçesi hesaplarında güç birimini dönüştürmek',
+    ],
+    faq: [
+      {
+        q: 'dBm nasıl watt olur?',
+        a: 'P(mW) = 10^(dBm / 10). 0 dBm = 1 mW, 30 dBm = 1 W, 20 dBm = 100 mW.',
+      },
+      {
+        q: 'dBm ile dB farkı nedir?',
+        a: 'dBm mutlak güçtür (referansı 1 mW); dB ise iki güç arasındaki orandır. İkisi karıştırılmamalıdır.',
+      },
+      {
+        q: 'Negatif dBm ne demek?',
+        a: '1 mW’tan küçük güç demektir; örneğin −30 dBm = 0,001 mW. Alıcı hassasiyetleri genellikle negatif dBm ile ifade edilir.',
+      },
+    ],
+  },
 ];

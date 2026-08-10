@@ -71,6 +71,80 @@ header('Content-Security-Policy: ' . $mtCsp);
 header('X-Robots-Tag: noindex, nofollow, noarchive');
 
 $frames = json_decode((string) $k['frames'], true) ?: [];
+
+/**
+ * Eylem satirlarini OLAY GUNLUGUNDEN turet.
+ *
+ * Kayitci bu isaretleri kendisi de gomuyor, ama iki sebeple asil kaynak
+ * burasi olmali:
+ *  1. Ozellik eklenmeden once alinmis kayitlarda gomulu isaret yok; olay
+ *     gunlugu ise bastan beri tutuluyor, dolayisiyla ESKI KAYITLAR da dolar.
+ *  2. Istemcinin gonderdigi veriye bagimli kalmamis oluruz.
+ *
+ * Kayit, sayfadan ayrilirken saklandigi icin created_at bitis anidir;
+ * baslangic = created_at - duration_ms. Ayni ziyaretcinin ayni yoldaki
+ * olaylari bu pencereye gore goreli zamana cevrilir.
+ */
+$olayEtiket = [
+    'tool_run'        => 'Araci calistirdi',
+    'tool_error'      => 'Hata aldi',
+    'affiliate_click' => 'Sponsorlu baglantiya tikladi',
+    'outbound'        => 'Disari cikan baglantiya tikladi',
+];
+
+try {
+    $st = mt_db()->prepare(
+        'SELECT event_type, label,
+                TIMESTAMPDIFF(SECOND, DATE_SUB(:bitis, INTERVAL :sure SECOND), created_at) AS saniye
+         FROM mt_events
+         WHERE visitor_hash = :vh AND path = :yol
+           AND created_at BETWEEN DATE_SUB(:bitis2, INTERVAL :sure2 SECOND) AND :bitis3
+           AND event_type IN ("tool_run", "tool_result", "tool_error",
+                              "affiliate_click", "outbound")
+         ORDER BY created_at'
+    );
+    $sure = (int) ceil(((int) $k['duration_ms']) / 1000) + 2; // yuvarlama payi
+    $st->execute([
+        ':vh' => $k['visitor_hash'], ':yol' => $k['path'],
+        ':bitis' => $k['created_at'], ':bitis2' => $k['created_at'], ':bitis3' => $k['created_at'],
+        ':sure' => $sure, ':sure2' => $sure,
+    ]);
+
+    foreach ($st as $o) {
+        $tur = (string) $o['event_type'];
+        if ($tur === 'tool_result') {
+            $etiket = ((string) $o['label']) === 'copy' ? 'Sonucu kopyaladi' : 'Sonucu indirdi';
+        } else {
+            $etiket = $olayEtiket[$tur] ?? $tur;
+        }
+        $ms = max(0, min((int) $k['duration_ms'], ((int) $o['saniye']) * 1000));
+        $frames[] = [4, $ms, $etiket];
+    }
+
+    // Zamana gore sirala; dokum ve oynatma sirali kare bekliyor.
+    usort($frames, static fn (array $a, array $b): int => $a[1] <=> $b[1]);
+
+    /*
+     * Yeni kayitlarda ayni eylem hem istemci tarafindan gomulur hem de olay
+     * gunlugunden turetilir. Ayni etiketin 3 saniye icindeki tekrari elenir;
+     * "2 dosya secildi" gibi yalnizca istemcinin bildigi isaretler kalir.
+     */
+    $gorulen = [];
+    $frames = array_values(array_filter($frames, static function (array $f) use (&$gorulen): bool {
+        if ($f[0] !== 4) {
+            return true;
+        }
+        $etiket = (string) $f[2];
+        if (isset($gorulen[$etiket]) && abs($f[1] - $gorulen[$etiket]) <= 3000) {
+            return false;
+        }
+        $gorulen[$etiket] = $f[1];
+        return true;
+    }));
+} catch (Throwable $e) {
+    // Olay gunlugu okunamazsa kayit yine de oynatilabilmeli.
+    error_log('replay olay birlestirme: ' . $e->getMessage());
+}
 $sure   = (int) $k['duration_ms'];
 ?><!doctype html>
 <html lang="tr">

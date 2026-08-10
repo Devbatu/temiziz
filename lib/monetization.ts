@@ -133,18 +133,6 @@ export const offers: Offer[] = [
     categories: ['developer'],
     tools: ['json-formatter', 'regex-tester', 'jwt-decoder', 'markdown-editor'],
   },
-  {
-    id: 'ai-writer',
-    title: 'Gelişmiş içerik asistanı',
-    description:
-      'Uzun form içerik, marka sesi eğitimi ve ekip iş birliği için profesyonel yazım platformu.',
-    cta: 'Ücretsiz dene',
-    url: 'https://example.com/writer?ref=multitools',
-    badge: 'Yeni',
-    icon: 'Sparkles',
-    categories: ['ai'],
-    tools: ['ai-blog-writer', 'ai-rewrite-tool', 'ai-title-generator'],
-  },
 ];
 
 /** Best-matching offers for a tool: exact tool match first, then category. */

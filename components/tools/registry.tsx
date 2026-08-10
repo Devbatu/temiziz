@@ -34,6 +34,7 @@ const web = () => import('./website-tools');
 const ai = () => import('./AiTool');
 const health = () => import('./health-tools');
 const business = () => import('./business-tools');
+const pro2 = () => import('./pro-tools-2');
 
 /**
  * slug → interactive widget.
@@ -140,6 +141,21 @@ export const toolComponents: Record<string, ComponentType> = {
   'demir-agirlik-hesaplama': lazy(() => business().then((m) => m.DemirAgirlik)),
   'beton-hesaplama': lazy(() => business().then((m) => m.BetonHesaplama)),
   'gecikme-faizi-hesaplama': lazy(() => business().then((m) => m.GecikmeFaizi)),
+
+  // ek klinik + muhendislik araclari (pro-tools-2)
+  'duzeltilmis-kalsiyum-hesaplama': lazy(() => pro2().then((m) => m.DuzeltilmisKalsiyum)),
+  'anyon-acigi-hesaplama': lazy(() => pro2().then((m) => m.AnyonAcigi)),
+  'map-hesaplama': lazy(() => pro2().then((m) => m.Map)),
+  'bsa-hesaplama': lazy(() => pro2().then((m) => m.Bsa)),
+  'ideal-kilo-hesaplama': lazy(() => pro2().then((m) => m.IdealKilo)),
+  'iv-damla-hesaplama': lazy(() => pro2().then((m) => m.IvDamla)),
+  'gebelik-hesaplama': lazy(() => pro2().then((m) => m.Gebelik)),
+  'qtc-hesaplama': lazy(() => pro2().then((m) => m.Qtc)),
+  'ohm-yasasi-hesaplama': lazy(() => pro2().then((m) => m.OhmYasasi)),
+  'uc-faz-guc-hesaplama': lazy(() => pro2().then((m) => m.UcFazGuc)),
+  'direnc-renk-kodu': lazy(() => pro2().then((m) => m.DirencRenkKodu)),
+  'kablo-gerilim-dusumu': lazy(() => pro2().then((m) => m.KabloGerilimDusumu)),
+  'dbm-watt-donusturucu': lazy(() => pro2().then((m) => m.DbmWatt)),
 };
 
 export function ToolRuntime({ slug, name }: { slug: string; name: string }) {

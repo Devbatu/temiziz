@@ -114,6 +114,17 @@ export default async function CategoryPage({
           </div>
         )}
 
+        {cat.intro && cat.intro.length > 0 && (
+          <section className="mt-14 max-w-3xl">
+            <h2 className="text-lg font-bold">{cat.name} hakkında</h2>
+            <div className="mt-4 space-y-4 leading-relaxed text-muted">
+              {cat.intro.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="mt-14">
           <h2 className="text-lg font-bold">Diğer kategoriler</h2>
           <div className="mt-4 flex flex-wrap gap-2">
